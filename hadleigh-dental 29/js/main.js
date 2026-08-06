@@ -2,7 +2,11 @@
 const menuToggle = document.querySelector('.menu-toggle');
 if (menuToggle) {
   menuToggle.addEventListener('click', () => {
-    document.body.classList.toggle('menu-open');
+    const isOpen = document.body.classList.toggle('menu-open');
+    menuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    if (!isOpen) {
+      document.querySelectorAll('.has-dropdown.open').forEach((item) => item.classList.remove('open'));
+    }
   });
 }
 
@@ -20,6 +24,7 @@ document.querySelectorAll('.has-dropdown > .nav-toggle').forEach((btn) => {
 document.querySelectorAll('.nav-links a').forEach((link) => {
   link.addEventListener('click', () => {
     document.body.classList.remove('menu-open');
+    if (menuToggle) menuToggle.setAttribute('aria-expanded', 'false');
   });
 });
 
