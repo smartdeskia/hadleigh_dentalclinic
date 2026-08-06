@@ -69,6 +69,7 @@ section { padding: 96px 0; }
 @media (max-width: 900px) {
   section { padding: 64px 0; }
   .wrap { padding: 0 20px; }
+  .site-header .wrap { padding-inline: max(24px, env(safe-area-inset-left, 0px)) max(20px, env(safe-area-inset-right, 0px)); }
 }
 
 .eyebrow {
@@ -138,12 +139,17 @@ section { padding: 96px 0; }
   background: rgba(244, 246, 245, 0.88);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
+  overflow: visible;
+}
+.site-header .wrap {
+  padding-inline: max(32px, env(safe-area-inset-left, 0px)) max(32px, env(safe-area-inset-right, 0px));
 }
 .nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 18px 0;
+  gap: 16px;
 }
 .logo {
   font-family: var(--font-display);
@@ -153,6 +159,10 @@ section { padding: 96px 0; }
   display: flex;
   flex-direction: column;
   line-height: 1.1;
+  flex-shrink: 0;
+  overflow: visible;
+  min-width: 0;
+  padding-inline: 2px;
 }
 .logo span {
   font-family: var(--font-mono);
@@ -162,6 +172,7 @@ section { padding: 96px 0; }
   text-transform: uppercase;
   color: var(--accent);
   margin-top: 3px;
+  padding-left: 0.14em;
 }
 .nav-links {
   display: flex;
@@ -709,12 +720,13 @@ textarea { resize: vertical; min-height: 120px; }
 .image-slot-banner { aspect-ratio: 21 / 8; border-radius: 0; }
 
 .full-bleed {
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  left: auto;
+  right: auto;
+  margin-left: 0;
+  margin-right: 0;
 }
 @media (max-width: 700px) {
   .image-slot-banner { aspect-ratio: 4 / 3; }
