@@ -65,9 +65,9 @@ p { margin: 0 0 1em; color: var(--text-muted); }
   margin: 0 auto;
   padding: 0 32px;
 }
-section { padding: 96px 0; }
+section { padding: 72px 0; }
 @media (max-width: 900px) {
-  section { padding: 64px 0; }
+  section { padding: 48px 0; }
   .wrap { padding: 0 20px; }
 }
 
@@ -91,7 +91,7 @@ section { padding: 96px 0; }
 
 .section-head {
   max-width: 640px;
-  margin-bottom: 56px;
+  margin-bottom: 40px;
 }
 .section-head h2 { font-size: clamp(1.9rem, 3vw, 2.6rem); color: var(--primary); }
 .section-head p { font-size: 1.05rem; }
@@ -472,7 +472,13 @@ section { padding: 96px 0; }
 }
 
 /* Service card */
+.service-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
 .service-card h3 { color: var(--primary); font-size: 1.3rem; }
+.service-card p { flex: 1; }
 .service-card .price-tag {
   font-family: var(--font-mono);
   font-size: 0.85rem;
@@ -480,7 +486,7 @@ section { padding: 96px 0; }
   margin-bottom: 12px;
   display: inline-block;
 }
-.service-card .btn { margin-top: 8px; }
+.service-card .btn { margin-top: auto; align-self: flex-start; }
 
 .icon-badge {
   width: 46px; height: 46px;
@@ -493,11 +499,15 @@ section { padding: 96px 0; }
 .icon-badge svg { width: 22px; height: 22px; }
 
 /* ---- CTA band ---- */
-.cta-band {
+.cta-section {
   background: var(--primary);
+  padding: 72px 0;
+}
+.cta-band {
+  background: transparent;
   color: var(--white);
-  border-radius: var(--radius);
-  padding: 56px;
+  border-radius: 0;
+  padding: 0;
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -514,8 +524,28 @@ section { padding: 96px 0; }
 .cta-band p { color: rgba(244, 246, 245, 0.75); position: relative; z-index: 1; max-width: 480px; margin: 0 auto 1.8em; }
 .cta-band .hero-ctas { justify-content: center; position: relative; z-index: 1; }
 
+/* New patients two-column block */
+.new-patients-grid {
+  align-items: stretch;
+}
+.new-patients-grid > .card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 100%;
+}
+
 /* ---- Team ---- */
-.team-card { text-align: left; }
+.team-card {
+  text-align: left;
+  box-shadow: 0 8px 24px rgba(23, 51, 46, 0.1);
+  border: 1px solid rgba(23, 51, 46, 0.1);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.team-card:hover {
+  box-shadow: 0 12px 32px rgba(23, 51, 46, 0.14);
+  transform: translateY(-2px);
+}
 .team-photo {
   width: 100%;
   aspect-ratio: 1 / 1;
