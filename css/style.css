@@ -1264,10 +1264,10 @@ body.menu-open .chat-panel { display: none; }
   }
 }
 .page-new-patients .cta-section:has(+ .site-footer) {
-  padding-bottom: 64px;
+  padding-bottom: 80px;
 }
 .page-new-patients .site-footer .footer-grid {
-  padding-top: 40px;
+  padding-top: 60px;
   border-top: 1px solid rgba(244, 246, 245, 0.14);
 }
 .page-new-patients .footer-tagline {
@@ -1276,6 +1276,12 @@ body.menu-open .chat-panel { display: none; }
 @media (max-width: 900px) {
   .page-new-patients .before-you-book {
     padding-bottom: 48px;
+  }
+  .page-new-patients .cta-section:has(+ .site-footer) {
+    padding-bottom: 48px;
+  }
+  .page-new-patients .site-footer .footer-grid {
+    padding-top: 48px;
   }
   .page-new-patients .site-footer {
     padding-bottom: 96px;
