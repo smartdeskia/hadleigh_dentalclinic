@@ -87,9 +87,15 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
 section:has(+ .cta-section) {
   padding-bottom: 0;
 }
-.cta-section + .site-footer,
+.cta-section + .site-footer {
+  margin-top: 0;
+  padding-top: 0;
+}
 .contact-map-section + .site-footer {
   margin-top: 0;
+}
+.cta-section:has(+ .site-footer) {
+  padding-bottom: 48px;
 }
 
 .eyebrow {
