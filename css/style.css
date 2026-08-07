@@ -84,17 +84,12 @@ section:has(> .full-bleed) {
 section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background"]) {
   padding-top: 0;
 }
-section:has(+ .cta-section) {
-  padding-bottom: 0;
-}
-section.home-team-section:has(+ .cta-section) {
+/* Restore bottom spacing on sections before CTA (buttons need breathing room) */
+.cta-section:has(+ .site-footer) {
   padding-bottom: 72px;
 }
-.cta-section:has(+ .site-footer) {
-  padding-bottom: 48px;
-}
 @media (max-width: 900px) {
-  section.home-team-section:has(+ .cta-section) {
+  .cta-section:has(+ .site-footer) {
     padding-bottom: 48px;
   }
 }
