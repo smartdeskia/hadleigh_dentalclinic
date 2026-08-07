@@ -87,11 +87,16 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
 section:has(+ .cta-section) {
   padding-bottom: 0;
 }
-.cta-section + .site-footer {
-  padding-top: 0;
+section.home-team-section:has(+ .cta-section) {
+  padding-bottom: 72px;
 }
 .cta-section:has(+ .site-footer) {
   padding-bottom: 48px;
+}
+@media (max-width: 900px) {
+  section.home-team-section:has(+ .cta-section) {
+    padding-bottom: 48px;
+  }
 }
 
 .eyebrow {
@@ -1263,6 +1268,9 @@ body.menu-open .chat-panel { display: none; }
 }
 .page-new-patients .cta-section:has(+ .site-footer) {
   padding-bottom: 80px;
+}
+.page-new-patients .cta-section + .site-footer {
+  padding-top: 0;
 }
 .page-new-patients .site-footer .footer-grid {
   padding-top: 60px;
