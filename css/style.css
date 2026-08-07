@@ -1238,6 +1238,9 @@ body.menu-open .chat-launcher,
 body.menu-open .chat-panel { display: none; }
 
 /* ---- New Patients page — bottom-section refinements ---- */
+.page-new-patients .before-you-book {
+  padding-bottom: 72px;
+}
 .page-new-patients .before-you-book .section-head {
   margin-bottom: 32px;
 }
@@ -1271,6 +1274,9 @@ body.menu-open .chat-panel { display: none; }
   color: rgba(244, 246, 245, 0.92);
 }
 @media (max-width: 900px) {
+  .page-new-patients .before-you-book {
+    padding-bottom: 48px;
+  }
   .page-new-patients .site-footer {
     padding-bottom: 96px;
   }
