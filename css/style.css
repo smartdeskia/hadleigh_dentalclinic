@@ -91,12 +91,17 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   margin: 0;
   overflow: hidden;
   line-height: 0;
+  border: none;
+  box-shadow: none;
 }
 .treatment-page-banner {
   position: relative;
   width: 100%;
   aspect-ratio: 21 / 8;
   overflow: hidden;
+  border: none;
+  box-shadow: none;
+  background: transparent;
 }
 .treatment-page-banner img {
   position: absolute;
@@ -106,6 +111,8 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   height: 100%;
   object-fit: cover;
   object-position: center;
+  border: none;
+  box-shadow: none;
 }
 .cosmetic-treatments-body {
   padding: 72px 0;
@@ -1122,7 +1129,7 @@ textarea { resize: vertical; min-height: 120px; }
   justify-content: center;
   overflow: hidden;
 }
-.image-slot:has(img) {
+.image-slot:has(img):not(.image-slot-banner) {
   border: 1px solid var(--line);
   box-shadow: var(--shadow-sm);
 }
@@ -1154,10 +1161,14 @@ textarea { resize: vertical; min-height: 120px; }
 .image-slot-wide { aspect-ratio: 16 / 10; }
 .image-slot-tall { aspect-ratio: 4 / 5; }
 .image-slot-banner { aspect-ratio: 21 / 8; border-radius: 0; }
-.image-slot-banner:has(img) {
+.image-slot-banner,
+.image-slot.image-slot-banner:has(img) {
   border: none;
   box-shadow: none;
   background: transparent;
+}
+.image-slot-banner img {
+  box-shadow: none;
 }
 
 .full-bleed {
