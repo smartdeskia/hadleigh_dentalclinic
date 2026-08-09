@@ -80,6 +80,15 @@ section:has(> .full-bleed) {
   padding: 0;
   overflow: hidden;
 }
+/* Visible gap after full-bleed banner strips (e.g. Cosmetic Treatments) */
+section.banner-strip {
+  margin-bottom: 72px;
+}
+@media (max-width: 900px) {
+  section.banner-strip {
+    margin-bottom: 48px;
+  }
+}
 /* Only strip top padding on transparent sections; coloured sections keep spacing */
 section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background"]) {
   padding-top: 0;
