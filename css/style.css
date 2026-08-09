@@ -1204,12 +1204,13 @@ textarea { resize: vertical; min-height: 120px; }
 .image-slot-banner img {
   box-shadow: none;
 }
-.banner-overlay {
+.image-slot-banner .hero-bg {
   position: absolute;
   inset: 0;
-  z-index: 1;
-  background: rgba(23, 51, 46, 0.58);
-  pointer-events: none;
+  z-index: 0;
+}
+.image-slot-banner .hero-bg img {
+  animation: none;
 }
 
 .full-bleed {
