@@ -1547,6 +1547,94 @@ body.chat-open .chat-panel {
 .chat-close-btn:hover { color: var(--white); }
 .chat-close-btn svg { width: 18px; height: 18px; }
 
+.chat-menu {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.chat-emergency-bar {
+  background: var(--primary);
+  color: var(--white);
+  padding: 14px 18px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.chat-emergency-label {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(244, 246, 245, 0.72);
+  margin-bottom: 4px;
+}
+.chat-emergency-phone {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--white);
+  text-decoration: none;
+}
+.chat-emergency-phone:hover { color: var(--accent); }
+.chat-menu-intro {
+  margin: 0;
+  padding: 16px 18px 8px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+.chat-menu-list {
+  display: flex;
+  flex-direction: column;
+  padding: 0 12px 12px;
+}
+.chat-menu-item {
+  display: block;
+  padding: 14px 12px;
+  border-radius: calc(var(--radius) - 2px);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.15s ease;
+}
+.chat-menu-item + .chat-menu-item {
+  border-top: 1px solid var(--line);
+}
+.chat-menu-item:hover,
+.chat-menu-item:focus-visible {
+  background: rgba(23, 51, 46, 0.06);
+  outline: none;
+}
+.chat-menu-item-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--primary);
+  line-height: 1.35;
+}
+.chat-menu-item-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.chat-menu-item-urgent .chat-menu-item-title {
+  color: #b84a3a;
+}
+
+#cost,
+#five-steps,
+#pricing,
+#nhs-pricing,
+#what-we-do,
+#treatment-highlights {
+  scroll-margin-top: 88px;
+}
+
 .chat-messages {
   flex: 1;
   overflow-y: auto;
