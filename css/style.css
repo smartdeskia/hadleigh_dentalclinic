@@ -84,10 +84,11 @@ section:has(> .full-bleed) {
 section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background"]) {
   padding-top: 0;
 }
-/* Homepage closing: copy on page background, buttons on green into footer */
+/* Homepage closing: copy on light bg; one green block for buttons + footer */
 .homepage-closing-copy {
   text-align: center;
-  padding: 72px 0 0;
+  padding: 72px 0 40px;
+  background: var(--bg);
 }
 .homepage-closing-copy h2 {
   font-family: var(--font-display);
@@ -102,31 +103,32 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   max-width: 480px;
   margin: 0 auto;
 }
-.homepage-closing-green {
+.homepage-green-footer-block {
   background: var(--primary);
-  margin-top: 40px;
-  padding: 48px 0 70px;
 }
-.homepage-closing-green .hero-ctas {
+.homepage-closing-actions {
+  padding: 48px 0 56px;
+}
+.homepage-closing-actions .hero-ctas {
   justify-content: center;
 }
-.homepage-closing + .site-footer {
+.homepage-green-footer-block .site-footer {
   margin-top: 0;
   padding-top: 0;
+  background: transparent;
 }
-.homepage-closing + .site-footer .footer-grid {
+.homepage-green-footer-block .site-footer .footer-grid {
   padding-top: 50px;
   border-top: 1px solid rgba(244, 246, 245, 0.14);
 }
 @media (max-width: 900px) {
   .homepage-closing-copy {
-    padding-top: 56px;
+    padding: 56px 0 32px;
   }
-  .homepage-closing-green {
-    margin-top: 32px;
+  .homepage-closing-actions {
     padding: 40px 0 48px;
   }
-  .homepage-closing + .site-footer .footer-grid {
+  .homepage-green-footer-block .site-footer .footer-grid {
     padding-top: 40px;
   }
 }
