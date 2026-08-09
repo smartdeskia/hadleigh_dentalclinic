@@ -1221,6 +1221,15 @@ textarea { resize: vertical; min-height: 120px; }
   background: rgba(23, 51, 46, 0.6);
   pointer-events: none;
 }
+.page-about .image-slot-banner {
+  aspect-ratio: 16 / 9;
+}
+.page-about .image-slot-banner .hero-bg img {
+  object-position: center top;
+}
+.page-about .image-slot-banner .hero-overlay {
+  background: rgba(23, 51, 46, 0.5);
+}
 
 .full-bleed {
   width: 100%;
