@@ -114,6 +114,40 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   border: none;
   box-shadow: none;
 }
+.banner-slideshow .banner-slide {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+  z-index: 0;
+}
+.banner-slideshow .banner-slide.is-active {
+  opacity: 1;
+  z-index: 1;
+}
+.banner-slideshow-dots {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+}
+.banner-slideshow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.45);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.banner-slideshow-dot.is-active {
+  background: var(--white);
+  transform: scale(1.15);
+}
+@media (prefers-reduced-motion: reduce) {
+  .banner-slideshow .banner-slide {
+    transition: none;
+  }
+}
 .cosmetic-treatments-body {
   padding: 72px 0;
 }
