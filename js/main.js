@@ -118,7 +118,7 @@ document.querySelectorAll('[data-banner-slideshow]').forEach((slideshow) => {
 
   let index = 0;
   let timer = null;
-  const intervalMs = 5000;
+  const intervalMs = 3000;
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const showSlide = (nextIndex) => {
