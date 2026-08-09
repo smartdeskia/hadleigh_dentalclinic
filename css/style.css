@@ -1204,6 +1204,19 @@ textarea { resize: vertical; min-height: 120px; }
 .image-slot-banner img {
   box-shadow: none;
 }
+.image-slot-banner .hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.image-slot-banner .hero-bg img {
+  animation: none;
+}
+.page-new-patients .image-slot-banner .hero-overlay {
+  z-index: 1;
+  background: rgba(23, 51, 46, 0.6);
+  pointer-events: none;
+}
 
 .full-bleed {
   width: 100%;
