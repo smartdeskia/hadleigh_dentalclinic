@@ -85,19 +85,21 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   padding-top: 0;
 }
 
-/* Cosmetic Treatments: gap between banner image and cards (same section avoids flush-rule override) */
+/* Cosmetic Treatments: even 72px gap above and below cards */
 .cosmetic-treatments-body {
-  padding-bottom: 72px;
+  padding-bottom: 0;
 }
 .cosmetic-treatments-body .cosmetic-treatments-cards {
   padding-top: 72px;
+  padding-bottom: 72px;
+}
+.cosmetic-treatments-body + .site-footer {
+  margin-top: 0;
 }
 @media (max-width: 900px) {
-  .cosmetic-treatments-body {
-    padding-bottom: 48px;
-  }
   .cosmetic-treatments-body .cosmetic-treatments-cards {
     padding-top: 48px;
+    padding-bottom: 48px;
   }
 }
 
