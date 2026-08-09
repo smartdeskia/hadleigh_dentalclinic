@@ -84,26 +84,17 @@ section:has(> .full-bleed) {
 section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background"]) {
   padding-top: 0;
 }
-/* CTA → footer: homepage closing band sits on page background, footer stays dark */
+/* CTA → footer: one continuous dark green block on homepage */
 .cta-section:has(+ .site-footer) {
-  background: transparent;
-  padding-bottom: 56px;
-}
-.cta-section:has(+ .site-footer) .cta-band {
-  color: var(--text);
-}
-.cta-section:has(+ .site-footer) .cta-band h2 {
-  color: var(--primary);
-}
-.cta-section:has(+ .site-footer) .cta-band p {
-  color: var(--text-muted);
+  padding-bottom: 70px;
 }
 .cta-section + .site-footer {
   margin-top: 0;
+  padding-top: 0;
 }
 .cta-section + .site-footer .footer-grid {
-  padding-top: 0;
-  border-top: none;
+  padding-top: 50px;
+  border-top: 1px solid rgba(244, 246, 245, 0.14);
 }
 .pre-footer-cta + .site-footer {
   margin-top: 0;
