@@ -657,53 +657,7 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
 .cta-band p { color: rgba(244, 246, 245, 0.75); max-width: 480px; margin: 0 auto 1.8em; }
 .cta-band .hero-ctas { justify-content: center; }
 
-/* New patients homepage teaser — 3-column layout */
-.new-patients-teaser {
-  display: grid;
-  grid-template-columns: 25% 40% 35%;
-  gap: clamp(24px, 3vw, 36px);
-  align-items: stretch;
-}
-.new-patients-teaser-image {
-  border-radius: var(--radius);
-  overflow: hidden;
-  aspect-ratio: 4 / 3;
-  box-shadow: var(--shadow-sm);
-}
-.new-patients-teaser-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.new-patients-teaser-text {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.new-patients-teaser-card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 100%;
-}
-@media (max-width: 1024px) {
-  .new-patients-teaser {
-    grid-template-columns: 1fr 1fr;
-  }
-  .new-patients-teaser-image {
-    grid-column: 1 / -1;
-  }
-}
-@media (max-width: 768px) {
-  .new-patients-teaser {
-    grid-template-columns: 1fr;
-  }
-  .new-patients-teaser-image {
-    aspect-ratio: 16 / 9;
-  }
-}
-
-/* Legacy alias — kept for other pages */
+/* New patients homepage teaser — 2-column layout */
 .new-patients-grid {
   align-items: stretch;
 }
