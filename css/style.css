@@ -84,22 +84,28 @@ section:has(> .full-bleed) {
 section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background"]) {
   padding-top: 0;
 }
-/* CTA → footer: flush dark background, divider, controlled spacing */
-.cta-section:has(+ .site-footer) {
+/* CTA → footer: flush pairing, controlled spacing */
+.cta-section:has(+ .site-footer),
+.pre-footer-cta:has(+ .site-footer) {
   padding-bottom: 70px;
 }
-.cta-section + .site-footer {
+.cta-section + .site-footer,
+.pre-footer-cta + .site-footer {
   margin-top: 0;
-  padding-top: 0;
 }
 .cta-section + .site-footer .footer-grid {
   padding-top: 50px;
   border-top: 1px solid rgba(244, 246, 245, 0.14);
 }
+.pre-footer-cta + .site-footer .footer-grid {
+  padding-top: 0;
+  border-top: none;
+}
 @media (max-width: 900px) {
-  .cta-section:has(+ .site-footer) {
-    padding-bottom: 48px;
-  }
+  .cta-section:has(+ .site-footer),
+.pre-footer-cta:has(+ .site-footer) {
+  padding-bottom: 56px;
+}
   .cta-section + .site-footer .footer-grid {
     padding-top: 40px;
   }
@@ -657,6 +663,17 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
 .cta-band p { color: rgba(244, 246, 245, 0.75); max-width: 480px; margin: 0 auto 1.8em; }
 .cta-band .hero-ctas { justify-content: center; }
 
+/* Pre-footer CTA — light band above sitewide footer */
+.pre-footer-cta {
+  background: var(--bg);
+  padding: 56px 0;
+  text-align: center;
+}
+.pre-footer-cta .wrap {
+  display: flex;
+  justify-content: center;
+}
+
 /* New patients homepage teaser — 2-column layout */
 .new-patients-grid {
   align-items: stretch;
@@ -1011,6 +1028,17 @@ textarea { resize: vertical; min-height: 120px; }
 .footer-col a:hover { color: var(--white); }
 .footer-hours { font-family: var(--font-mono); font-size: 0.85rem; }
 .footer-hours div { display: flex; justify-content: space-between; margin-bottom: 8px; gap: 20px; }
+.footer-contact-details {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+}
+.footer-contact-details li { margin-bottom: 10px; }
+.footer-contact-details a {
+  font-size: 0.92rem;
+  color: rgba(244, 246, 245, 0.8);
+}
+.footer-contact-details a:hover { color: var(--white); }
 .footer-bottom {
   padding-top: 28px;
   display: flex;
