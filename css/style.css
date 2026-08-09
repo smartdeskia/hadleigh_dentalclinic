@@ -850,16 +850,12 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
 .video-slot-inner svg { width: 36px; height: 36px; opacity: 0.5; }
 .opening-hours-card h3 { font-size: 1.2rem; }
 .opening-hours-card .footer-hours { margin-top: 8px; }
-.treatment-opening-hours { padding-top: 48px; padding-bottom: 48px; }
-.treatment-video-section {
-  padding: 0;
-  overflow: hidden;
-}
 .treatment-video-strip {
   background: #000;
   aspect-ratio: 16 / 9;
   max-height: 70vh;
   min-height: 220px;
+  overflow: hidden;
 }
 .treatment-vimeo-embed {
   width: 100%;
