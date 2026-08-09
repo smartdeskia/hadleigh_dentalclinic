@@ -1647,6 +1647,9 @@ body.menu-open .chat-panel { display: none; }
 .page-new-patients .before-you-book .card p:last-child {
   margin-bottom: 0;
 }
+.page-new-patients .before-you-book-cta {
+  margin-top: 40px;
+}
 @media (min-width: 901px) {
   .page-new-patients .before-you-book .grid {
     align-items: stretch;
