@@ -84,53 +84,26 @@ section:has(> .full-bleed) {
 section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background"]) {
   padding-top: 0;
 }
-/* Homepage closing: copy on light bg; one green block for buttons + footer */
-.homepage-closing-copy {
-  text-align: center;
-  padding: 72px 0 40px;
-  background: var(--bg);
-}
-.homepage-closing-copy h2 {
-  font-family: var(--font-display);
-  font-size: clamp(1.9rem, 3vw, 2.4rem);
-  color: var(--primary);
-  max-width: 560px;
-  margin: 0 auto 0.4em;
-}
-.homepage-closing-copy p {
-  font-size: 1.05rem;
-  color: var(--text-muted);
-  max-width: 480px;
-  margin: 0 auto;
-}
-.homepage-green-footer-block {
-  background: var(--primary);
-}
-.homepage-closing-actions {
-  padding: 48px 0 56px;
-}
-.homepage-closing-actions .hero-ctas {
-  justify-content: center;
-}
-.homepage-green-footer-block .site-footer {
-  margin-top: 0;
-  padding-top: 0;
+/* CTA → footer: homepage closing band sits on page background, footer stays dark */
+.cta-section:has(+ .site-footer) {
   background: transparent;
+  padding-bottom: 56px;
 }
-.homepage-green-footer-block .site-footer .footer-grid {
-  padding-top: 50px;
-  border-top: 1px solid rgba(244, 246, 245, 0.14);
+.cta-section:has(+ .site-footer) .cta-band {
+  color: var(--text);
 }
-@media (max-width: 900px) {
-  .homepage-closing-copy {
-    padding: 56px 0 32px;
-  }
-  .homepage-closing-actions {
-    padding: 40px 0 48px;
-  }
-  .homepage-green-footer-block .site-footer .footer-grid {
-    padding-top: 40px;
-  }
+.cta-section:has(+ .site-footer) .cta-band h2 {
+  color: var(--primary);
+}
+.cta-section:has(+ .site-footer) .cta-band p {
+  color: var(--text-muted);
+}
+.cta-section + .site-footer {
+  margin-top: 0;
+}
+.cta-section + .site-footer .footer-grid {
+  padding-top: 0;
+  border-top: none;
 }
 .pre-footer-cta + .site-footer {
   margin-top: 0;
