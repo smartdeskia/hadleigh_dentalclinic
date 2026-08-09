@@ -1230,6 +1230,14 @@ textarea { resize: vertical; min-height: 120px; }
 .page-about .image-slot-banner .hero-overlay {
   background: rgba(23, 51, 46, 0.5);
 }
+.page-about section:has(> .full-bleed) + section#team {
+  padding-top: 72px;
+}
+@media (max-width: 900px) {
+  .page-about section:has(> .full-bleed) + section#team {
+    padding-top: 48px;
+  }
+}
 
 .full-bleed {
   width: 100%;
