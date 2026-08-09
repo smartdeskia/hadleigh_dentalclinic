@@ -821,6 +821,54 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   margin: 0 auto;
 }
 
+/* ---- Shared treatment page sections (Task 6) ---- */
+.treatment-comfort-section h2 {
+  color: var(--primary);
+  font-size: clamp(1.6rem, 2.6vw, 2rem);
+  margin-bottom: 16px;
+}
+.video-slot {
+  position: relative;
+  border-radius: var(--radius);
+  background: var(--bg-warm);
+  border: 1.5px dashed rgba(23, 51, 46, 0.22);
+  aspect-ratio: 16 / 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.video-slot-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  color: var(--secondary);
+}
+.video-slot-inner svg { width: 36px; height: 36px; opacity: 0.5; }
+.opening-hours-card h3 { font-size: 1.2rem; }
+.opening-hours-card .footer-hours { margin-top: 8px; }
+.treatment-crosslinks {
+  padding-top: 56px;
+  padding-bottom: 56px;
+  background: var(--bg);
+}
+.treatment-crosslinks .section-head { margin-bottom: 32px; }
+.treatment-crosslinks[data-current="dental-implants"] .treatment-tile[data-treatment="dental-implants"],
+.treatment-crosslinks[data-current="invisalign"] .treatment-tile[data-treatment="invisalign"],
+.treatment-crosslinks[data-current="teeth-whitening"] .treatment-tile[data-treatment="teeth-whitening"],
+.treatment-crosslinks[data-current="family-dentistry"] .treatment-tile[data-treatment="family-dentistry"],
+.treatment-crosslinks[data-current="hygiene-plus"] .treatment-tile[data-treatment="hygiene-plus"] {
+  pointer-events: none;
+  opacity: 0.42;
+}
+.treatment-crosslinks .treatment-tile[aria-current="page"] .treatment-tile-btn {
+  opacity: 1;
+  transform: none;
+}
+
 /* ---- Team ---- */
 .team-card {
   text-align: left;
