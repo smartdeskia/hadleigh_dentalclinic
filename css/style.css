@@ -110,11 +110,11 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
 .homepage-closing-green .hero-ctas {
   justify-content: center;
 }
-.homepage-closing-green + .site-footer {
+.homepage-closing + .site-footer {
   margin-top: 0;
   padding-top: 0;
 }
-.homepage-closing-green + .site-footer .footer-grid {
+.homepage-closing + .site-footer .footer-grid {
   padding-top: 50px;
   border-top: 1px solid rgba(244, 246, 245, 0.14);
 }
@@ -126,7 +126,7 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
     margin-top: 32px;
     padding: 40px 0 48px;
   }
-  .homepage-closing-green + .site-footer .footer-grid {
+  .homepage-closing + .site-footer .footer-grid {
     padding-top: 40px;
   }
 }
