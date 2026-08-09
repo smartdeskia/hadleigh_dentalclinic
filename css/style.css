@@ -108,19 +108,17 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   border: none;
 }
 .cosmetic-treatments-body {
-  padding-bottom: 0;
+  padding: 72px 0;
 }
 .cosmetic-treatments-body .cosmetic-treatments-cards {
-  padding-top: 72px;
-  padding-bottom: 72px;
+  padding: 0;
 }
 .cosmetic-treatments-body + .site-footer {
   margin-top: 0;
 }
 @media (max-width: 900px) {
-  .cosmetic-treatments-body .cosmetic-treatments-cards {
-    padding-top: 48px;
-    padding-bottom: 48px;
+  .cosmetic-treatments-body {
+    padding: 48px 0;
   }
 }
 @media (max-width: 700px) {
