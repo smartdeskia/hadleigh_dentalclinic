@@ -85,7 +85,28 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   padding-top: 0;
 }
 
-/* Cosmetic Treatments: even 72px gap above and below cards */
+/* Cosmetic Treatments: flush banner + even card spacing */
+.cosmetic-treatments-hero {
+  padding-bottom: 0;
+}
+.treatment-page-banner {
+  display: block;
+  width: 100%;
+  aspect-ratio: 21 / 8;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  background: var(--primary);
+}
+.treatment-page-banner img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  border: none;
+}
 .cosmetic-treatments-body {
   padding-bottom: 0;
 }
@@ -100,6 +121,11 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   .cosmetic-treatments-body .cosmetic-treatments-cards {
     padding-top: 48px;
     padding-bottom: 48px;
+  }
+}
+@media (max-width: 700px) {
+  .treatment-page-banner {
+    aspect-ratio: 4 / 3;
   }
 }
 
@@ -1135,6 +1161,11 @@ textarea { resize: vertical; min-height: 120px; }
 .image-slot-wide { aspect-ratio: 16 / 10; }
 .image-slot-tall { aspect-ratio: 4 / 5; }
 .image-slot-banner { aspect-ratio: 21 / 8; border-radius: 0; }
+.image-slot-banner:has(img) {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
 
 .full-bleed {
   width: 100%;
