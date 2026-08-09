@@ -87,9 +87,10 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
 
 /* Cosmetic Treatments: flush banner + even card spacing */
 .cosmetic-treatments-hero {
-  padding-bottom: 0;
+  padding: 64px 0 0;
 }
 .treatment-page-banner {
+  position: relative;
   display: block;
   width: 100%;
   aspect-ratio: 21 / 8;
@@ -97,14 +98,15 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   margin: 0;
   padding: 0;
   line-height: 0;
-  background: var(--primary);
 }
 .treatment-page-banner img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center top;
   border: none;
 }
 .cosmetic-treatments-body {
