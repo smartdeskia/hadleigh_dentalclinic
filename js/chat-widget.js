@@ -1,115 +1,93 @@
-// Sofia — website chat widget
-// PLACEHOLDER MODE: replies below are canned/keyword-matched, not a real AI yet.
-// To go live: replace the body of getBotReply() with a fetch() call to a
-// real backend endpoint (see the comment inside that function).
+// Sofia — menu-driven website assistant
+// Structured topic menu (no free-text input). Replaces the earlier keyword-matched placeholder chat.
 
 (function () {
   const launcher = document.getElementById('chat-launcher');
   const panel = document.getElementById('chat-panel');
   const closeBtn = document.getElementById('chat-close-btn');
-  const messagesEl = document.getElementById('chat-messages');
-  const form = document.getElementById('chat-input-form');
-  const input = document.getElementById('chat-input');
-  const sendBtn = document.getElementById('chat-send-btn');
-  const quickReplies = document.getElementById('chat-quick-replies');
 
   if (!launcher || !panel) return;
 
+  const MENU_ITEMS = [
+    {
+      title: "I'm interested in Dental Implants",
+      description: 'From £2,000 per tooth. Book a free consultation.',
+      href: 'dental-implants.html#cost',
+    },
+    {
+      title: "I'd like to learn about Invisalign",
+      description: 'Platinum Elite provider. Free consultation available.',
+      href: 'invisalign.html#five-steps',
+    },
+    {
+      title: "I'm interested in Teeth Whitening",
+      description: 'From £20/month, interest-free plans available.',
+      href: 'teeth-whitening.html#pricing',
+    },
+    {
+      title: "I'd like to know about Family Dentistry / NHS pricing",
+      description: 'See NHS bands from £23.80.',
+      href: 'family-dentistry.html#nhs-pricing',
+    },
+    {
+      title: 'I need a hygienist appointment',
+      description: 'No referral needed — direct access available.',
+      href: 'hygiene-plus.html#what-we-do',
+    },
+    {
+      title: "I have a dental emergency / I'm in pain",
+      description: 'Please contact us urgently to arrange an appointment.',
+      href: 'contact.html',
+      urgent: true,
+    },
+    {
+      title: "I'm a new patient",
+      description: 'See what your first visit covers.',
+      href: 'contact.html',
+      booking: true,
+    },
+    {
+      title: 'More options',
+      description: 'Browse all our treatments.',
+      href: 'index.html#treatment-highlights',
+    },
+  ];
+
+  panel.querySelectorAll('#chat-messages, #chat-quick-replies, #chat-input-form').forEach((el) => el.remove());
+
+  const menuRoot = document.createElement('div');
+  menuRoot.className = 'chat-menu';
+  menuRoot.innerHTML = `
+    <div class="chat-emergency-bar">
+      <span class="chat-emergency-label">Urgent? Call now</span>
+      <a class="chat-emergency-phone" href="tel:01702553106">01702 553 106</a>
+    </div>
+    <p class="chat-menu-intro">Choose a topic below and we'll take you straight to the right place.</p>
+    <nav class="chat-menu-list" aria-label="Help topics"></nav>
+  `;
+  panel.appendChild(menuRoot);
+
+  const menuList = menuRoot.querySelector('.chat-menu-list');
+
+  MENU_ITEMS.forEach((item) => {
+    const link = document.createElement('a');
+    link.className = 'chat-menu-item';
+    if (item.urgent) link.classList.add('chat-menu-item-urgent');
+    link.href = item.href;
+    link.innerHTML = `
+      <span class="chat-menu-item-title">${item.title}</span>
+      <span class="chat-menu-item-desc">${item.description}</span>
+    `;
+    link.addEventListener('click', () => {
+      document.body.classList.remove('chat-open');
+    });
+    menuList.appendChild(link);
+  });
+
   function toggleChat() {
     document.body.classList.toggle('chat-open');
-    if (document.body.classList.contains('chat-open')) {
-      input.focus();
-    }
   }
 
   launcher.addEventListener('click', toggleChat);
   closeBtn.addEventListener('click', toggleChat);
-
-  function addMessage(text, sender) {
-    const msg = document.createElement('div');
-    msg.className = 'chat-msg ' + sender;
-    msg.innerHTML = text;
-    messagesEl.appendChild(msg);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function showTyping() {
-    const typing = document.createElement('div');
-    typing.className = 'chat-typing';
-    typing.id = 'chat-typing-indicator';
-    typing.innerHTML = '<span></span><span></span><span></span>';
-    messagesEl.appendChild(typing);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function hideTyping() {
-    const typing = document.getElementById('chat-typing-indicator');
-    if (typing) typing.remove();
-  }
-
-  // ---- PLACEHOLDER reply logic (keyword-matched, no AI) ----
-  // Replace this whole function with a real backend call when ready, e.g.:
-  //
-  //   async function getBotReply(userText) {
-  //     const res = await fetch('/api/chat', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ message: userText }),
-  //     });
-  //     const data = await res.json();
-  //     return data.reply;
-  //   }
-  //
-  function getBotReply(userText) {
-    const t = userText.toLowerCase();
-
-    if (t.includes('book') || t.includes('appointment') || t.includes('consult')) {
-      return "I'd love to help you book. You can call us directly on <a href=\"tel:01702553106\">01702 553 106</a>, or use our <a href=\"contact.html\">contact form</a> and we'll get back to you shortly.";
-    }
-    if (t.includes('price') || t.includes('cost') || t.includes('how much')) {
-      return "You can see our full price list on the <a href=\"about.html#pricing\">About page</a> — everything from check-ups to Invisalign is listed there.";
-    }
-    if (t.includes('hour') || t.includes('open') || t.includes('close')) {
-      return "We're open Mon&ndash;Fri 9:00&ndash;18:00, with occasional Saturdays. Closed Sundays.";
-    }
-    if (t.includes('invisalign') || t.includes('whiten') || t.includes('cosmetic')) {
-      return "Take a look at our <a href=\"cosmetic-dentistry.html\">Cosmetic Dentistry page</a> for details on Invisalign, whitening, and more.";
-    }
-    if (t.includes('new patient') || t.includes('first visit') || t.includes('nervous')) {
-      return "No pressure at all — our <a href=\"new-patients.html\">New Patients page</a> covers exactly what to expect at your first visit.";
-    }
-    if (t.includes('address') || t.includes('where') || t.includes('location') || t.includes('parking')) {
-      return "We're at 279 London Road, Hadleigh, Essex, SS7 2BN. You'll find a map on our <a href=\"contact.html\">Contact page</a>.";
-    }
-    if (t.includes('hi') || t.includes('hello') || t.includes('hey')) {
-      return "Hi there! I'm Sofia, the assistant for Hadleigh Dental. I'm still in demo mode right now, but I can point you toward booking, pricing, or general info &mdash; what can I help with?";
-    }
-    return "Thanks for your message! I'm still in demo mode, so I can't fully understand everything yet &mdash; but for anything specific, calling <a href=\"tel:01702553106\">01702 553 106</a> or using the <a href=\"contact.html\">contact form</a> will get you a real answer fast.";
-  }
-
-  function handleSend(text) {
-    if (!text.trim()) return;
-    addMessage(text, 'user');
-    input.value = '';
-    sendBtn.disabled = true;
-    if (quickReplies) quickReplies.style.display = 'none';
-
-    showTyping();
-    setTimeout(() => {
-      hideTyping();
-      addMessage(getBotReply(text), 'bot');
-      sendBtn.disabled = false;
-    }, 700 + Math.random() * 500);
-  }
-
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    handleSend(input.value);
-  });
-
-  if (quickReplies) {
-    quickReplies.querySelectorAll('.chat-quick-btn').forEach((btn) => {
-      btn.addEventListener('click', () => handleSend(btn.textContent));
-    });
-  }
 })();
