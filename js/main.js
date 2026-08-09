@@ -175,6 +175,20 @@ if ('IntersectionObserver' in window && revealEls.length) {
 }
 
 // Contact form (Formspree-ready — swap YOUR_FORM_ID before going live)
+// Make.com webhook — PLACEHOLDER: replace with real URL once the
+// "Website Contact Form Alert" scenario is built in Make (Zadarma SMS).
+const CONTACT_SMS_WEBHOOK_URL = 'https://hook.make.com/PLACEHOLDER_WEBHOOK_ID';
+
+const notifyStaffContactSms = (payload) => {
+  fetch(CONTACT_SMS_WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  }).catch(() => {
+    // Fire-and-forget: staff SMS is best-effort; never affect visitor UX.
+  });
+};
+
 const contactForm = document.getElementById('contact-form');
 if (contactForm) {
   contactForm.addEventListener('submit', async (e) => {
@@ -185,10 +199,18 @@ if (contactForm) {
     btn.textContent = 'Sending…';
     btn.disabled = true;
 
+    const formData = new FormData(contactForm);
+    notifyStaffContactSms({
+      name: formData.get('name'),
+      phone: formData.get('phone'),
+      email: formData.get('email'),
+      message: formData.get('message'),
+    });
+
     try {
       const response = await fetch(contactForm.action, {
         method: 'POST',
-        body: new FormData(contactForm),
+        body: formData,
         headers: { Accept: 'application/json' },
       });
       if (response.ok) {
