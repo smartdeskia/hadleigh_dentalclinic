@@ -123,6 +123,10 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
   opacity: 1;
   z-index: 1;
 }
+.treatment-page-banner .hero-overlay {
+  z-index: 1;
+  pointer-events: none;
+}
 .banner-slideshow-dots {
   position: absolute;
   left: 50%;
