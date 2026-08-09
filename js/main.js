@@ -110,6 +110,51 @@ document.querySelectorAll('.compare-slider').forEach((el) => {
   setPos(Number(range.value));
 });
 
+// Banner slideshow (Cosmetic Treatments page)
+document.querySelectorAll('[data-banner-slideshow]').forEach((slideshow) => {
+  const slides = Array.from(slideshow.querySelectorAll('.banner-slide'));
+  const dots = Array.from(slideshow.querySelectorAll('.banner-slideshow-dot'));
+  if (slides.length < 2) return;
+
+  let index = 0;
+  let timer = null;
+  const intervalMs = 5000;
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const showSlide = (nextIndex) => {
+    index = (nextIndex + slides.length) % slides.length;
+    slides.forEach((slide, i) => slide.classList.toggle('is-active', i === index));
+    dots.forEach((dot, i) => dot.classList.toggle('is-active', i === index));
+  };
+
+  const startTimer = () => {
+    if (reducedMotion) return;
+    stopTimer();
+    timer = window.setInterval(() => showSlide(index + 1), intervalMs);
+  };
+
+  const stopTimer = () => {
+    if (timer !== null) {
+      window.clearInterval(timer);
+      timer = null;
+    }
+  };
+
+  dots.forEach((dot, dotIndex) => {
+    dot.addEventListener('click', () => {
+      showSlide(dotIndex);
+      startTimer();
+    });
+  });
+
+  slideshow.addEventListener('mouseenter', stopTimer);
+  slideshow.addEventListener('mouseleave', startTimer);
+  slideshow.addEventListener('focusin', stopTimer);
+  slideshow.addEventListener('focusout', startTimer);
+
+  startTimer();
+});
+
 // Scroll reveal
 const revealEls = document.querySelectorAll('.reveal');
 if ('IntersectionObserver' in window && revealEls.length) {
