@@ -80,18 +80,18 @@ section:has(> .full-bleed) {
   padding: 0;
   overflow: hidden;
 }
-/* Only strip top padding on transparent sections; coloured sections keep spacing */
-section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background"]):not(.after-banner) {
-  padding-top: 0;
-}
-/* Optional gap after full-bleed banner before card/content sections */
-section:has(> .full-bleed) + section.after-banner {
-  padding-top: 56px;
+/* Visible gap after full-bleed banner strips (e.g. Cosmetic Treatments) */
+section.banner-strip {
+  margin-bottom: 72px;
 }
 @media (max-width: 900px) {
-  section:has(> .full-bleed) + section.after-banner {
-    padding-top: 40px;
+  section.banner-strip {
+    margin-bottom: 48px;
   }
+}
+/* Only strip top padding on transparent sections; coloured sections keep spacing */
+section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background"]) {
+  padding-top: 0;
 }
 /* CTA → footer: homepage closing band sits on page background, footer stays dark */
 .cta-section:has(+ .site-footer) {
