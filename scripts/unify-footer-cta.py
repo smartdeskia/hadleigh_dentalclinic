@@ -105,9 +105,7 @@ def patch_file(path: Path, include_pre_footer: bool):
 
 def main():
     for path in sorted(ROOT.glob("*.html")):
-        if path.name == "index.html":
-            continue  # Homepage uses dark cta-section + footer, not pre-footer-cta
-        patch_file(path, include_pre_footer=path.name != "contact.html")
+        patch_file(path, include_pre_footer=False)
 
 
 if __name__ == "__main__":
