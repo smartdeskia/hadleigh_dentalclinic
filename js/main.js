@@ -129,6 +129,19 @@ if ('IntersectionObserver' in window && revealEls.length) {
   revealEls.forEach((el) => el.classList.add('in'));
 }
 
+// Back to top (homepage only — button present on index.html)
+const backToTop = document.getElementById('back-to-top');
+if (backToTop) {
+  const toggleBackToTop = () => {
+    backToTop.classList.toggle('is-visible', window.scrollY > 400);
+  };
+  window.addEventListener('scroll', toggleBackToTop, { passive: true });
+  toggleBackToTop();
+  backToTop.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+}
+
 // Contact form (Formspree-ready — swap YOUR_FORM_ID before going live)
 const contactForm = document.getElementById('contact-form');
 if (contactForm) {
