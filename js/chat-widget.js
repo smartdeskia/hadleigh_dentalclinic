@@ -179,23 +179,40 @@
     return /inv\w*lign/.test(t) || t.includes('aligner') || t.includes('brace');
   }
 
+  function isBotName(text) {
+    const t = text.trim().toLowerCase();
+    return t === 'sofia' || t === 'sophie';
+  }
+
+  function formatName(text) {
+    return text
+      .split(/\s+/)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ');
+  }
+
   function extractName(text) {
     let cleaned = text.trim().replace(/[!.?]+$/, '').trim();
     if (!cleaned) return null;
+
+    let fromExplicitIntro = false;
 
     // "name is" anywhere — handles typos ("may name is Rich") and extra lead-ins ("Hi my name is Sophie").
     const nameIsMatch = cleaned.match(/\bname is\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i);
     if (nameIsMatch) {
       cleaned = nameIsMatch[1].trim();
+      fromExplicitIntro = true;
     } else {
       const explicitMatch = cleaned.match(
         /(?:i am|i'?m|im|it'?s|its|this is|call me)\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i
       );
       if (explicitMatch) {
         cleaned = explicitMatch[1].trim();
+        fromExplicitIntro = true;
       } else {
         const leadPatterns = [
           /^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[,!\s]+/i,
+          /^(hi|hello|hey|hiya)$/i,
           /^(i am|i'?m|im)\s+/i,
           /^(this is|it'?s|its|call me)\s+/i,
         ];
@@ -216,11 +233,9 @@
     cleaned = cleaned.replace(/[!.?]+$/, '').trim();
     if (!cleaned || cleaned.length > 40 || cleaned.split(/\s+/).length > 3) return null;
     if (looksLikeQuestion(cleaned) || isGreeting(cleaned)) return null;
+    if (!fromExplicitIntro && isBotName(cleaned)) return null;
 
-    return cleaned
-      .split(/\s+/)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-      .join(' ');
+    return formatName(cleaned);
   }
 
   function maybePersonalize(text) {
@@ -489,7 +504,7 @@
     input.value = '';
     sendBtn.disabled = true;
 
-    if (greetingState === 'awaiting_name') {
+    if (greetingState === 'awaiting_name' || greetingState === 'awaiting_name_retry') {
       const name = extractName(text);
       if (name) {
         visitorName = name;
@@ -498,14 +513,15 @@
         return;
       }
 
-      if (isGreeting(text)) {
-        replyWithDelay('Hi! I\'m Sofia 👋 What\'s your name?');
-        return;
-      }
-
       if (looksLikeQuestion(text)) {
         greetingState = 'ready';
         replyWithDelay(getBotReply(text));
+        return;
+      }
+
+      if (greetingState === 'awaiting_name') {
+        greetingState = 'awaiting_name_retry';
+        replyWithDelay('I didn\'t quite catch your name &mdash; what should I call you?');
         return;
       }
 
