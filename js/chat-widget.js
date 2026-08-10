@@ -157,6 +157,12 @@
     return QUESTION_HINTS.some((hint) => t.includes(hint));
   }
 
+  function mentionsCleaning(text) {
+    const t = text.toLowerCase();
+    // "clean" covers cleaning/cleanings and typos like "teetgh cleaning" (no exact "teeth" required).
+    return t.includes('hygien') || t.includes('clean') || t.includes('scale') || t.includes('polish');
+  }
+
   function extractName(text) {
     let cleaned = text.trim().replace(/[!.?]+$/, '').trim();
     if (!cleaned) return null;
@@ -252,7 +258,7 @@
     }
     if (
       (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
-      && (t.includes('hygien') || t.includes('clean') || t.includes('scale') || t.includes('polish') || t.includes('teeth cleaning'))
+      && mentionsCleaning(userText)
     ) {
       return finalizeReply(
         maybePersonalize(
@@ -347,7 +353,7 @@
         )
       );
     }
-    if (t.includes('hygien') || t.includes('scale and polish') || t.includes('direct access')) {
+    if (mentionsCleaning(userText) || t.includes('direct access')) {
       return finalizeReply(
         maybePersonalize(
           'Direct-access hygiene is available with no referral needed &mdash; visits from &pound;52 for 30 minutes. Learn more on our <a href="hygiene-plus.html#what-we-do">Hygiene Plus page</a>.'
