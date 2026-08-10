@@ -144,6 +144,13 @@
     return /^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[!.?\s]*$/i.test(t);
   }
 
+  function isThankYou(text) {
+    const t = text.trim().toLowerCase().replace(/[!.?]+$/, '').trim();
+    if (/^(thank you|thanks|thankyou|cheers)$/.test(t)) return true;
+    if (/^(ok(ay)?|great|lovely|perfect)\s+(thanks|thank you|thankyou|cheers)$/.test(t)) return true;
+    return false;
+  }
+
   function looksLikeQuestion(text) {
     const t = text.toLowerCase();
     if (t.includes('?')) return true;
@@ -225,6 +232,9 @@
           'If you\'re in pain, please call us urgently on <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a> so we can arrange an appointment as soon as possible.'
         )
       );
+    }
+    if (isThankYou(userText)) {
+      return 'You\'re welcome! Let us know if there\'s anything else I can help with.';
     }
     if (t.includes('reschedule') || t.includes('change my appointment') || t.includes('move my appointment')) {
       return finalizeReply(
