@@ -11,6 +11,13 @@
   const CONTACT_FOOTER =
     ' For anything else, our team can help directly — <a href="contact.html">get in touch here</a>.';
 
+  const QUESTION_HINTS = [
+    'book', 'appointment', 'consult', 'hour', 'open', 'close', 'price', 'cost', 'how much',
+    'where', 'address', 'location', 'park', 'nhs', 'finance', 'payment', 'implant', 'invisalign',
+    'whiten', 'hygien', 'family', 'child', 'new patient', 'first visit', 'nervous', 'cosmetic',
+    'botox', 'filler', 'email', 'phone', 'call', 'emergency', 'pain', 'urgent', 'toothache',
+  ];
+
   const MENU_ITEMS = [
     {
       title: "I'm interested in Dental Implants",
@@ -56,7 +63,11 @@
     },
   ];
 
-  panel.querySelectorAll('#chat-messages, #chat-quick-replies, #chat-input-form, .chat-body').forEach((el) => {
+  let visitorName = null;
+  let greetingState = 'idle';
+  let hasShownOpeningGreeting = false;
+
+  panel.querySelectorAll('#chat-messages, #chat-quick-replies, #chat-input-form, .chat-body, .chat-ask-divider, .chat-transcript').forEach((el) => {
     el.remove();
   });
 
@@ -113,6 +124,14 @@
   const input = form.querySelector('#chat-input');
   const sendBtn = form.querySelector('#chat-send-btn');
 
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
   function finalizeReply(text) {
     if (text.includes('contact.html') || text.includes('tel:01702553106')) {
       return text;
@@ -120,101 +139,169 @@
     return text + CONTACT_FOOTER;
   }
 
+  function isGreeting(text) {
+    const t = text.trim().toLowerCase();
+    return /^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[!.?\s]*$/i.test(t);
+  }
+
+  function looksLikeQuestion(text) {
+    const t = text.toLowerCase();
+    if (t.includes('?')) return true;
+    return QUESTION_HINTS.some((hint) => t.includes(hint));
+  }
+
+  function extractName(text) {
+    let cleaned = text.trim().replace(/^(i'?m|i am|my name is|this is|it'?s|call me)\s+/i, '').trim();
+    cleaned = cleaned.replace(/[!.?]+$/, '').trim();
+    if (!cleaned || cleaned.length > 40 || cleaned.split(/\s+/).length > 3) return null;
+    if (looksLikeQuestion(cleaned) || isGreeting(cleaned)) return null;
+    return cleaned
+      .split(/\s+/)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ');
+  }
+
+  function maybePersonalize(text) {
+    if (!visitorName) return text;
+    if (text.startsWith('I\'m not sure')) {
+      return text.replace('I\'m not sure', `I'm not sure, ${escapeHtml(visitorName)},`);
+    }
+    return text;
+  }
+
   function getBotReply(userText) {
     const t = userText.toLowerCase();
 
     if (t.includes('emergency') || t.includes('pain') || t.includes('urgent') || t.includes('toothache')) {
       return finalizeReply(
-        'If you\'re in pain, please call us urgently on <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a> so we can arrange an appointment as soon as possible.'
+        maybePersonalize(
+          'If you\'re in pain, please call us urgently on <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a> so we can arrange an appointment as soon as possible.'
+        )
       );
     }
     if (t.includes('book') || t.includes('appointment') || t.includes('consult')) {
       return finalizeReply(
-        'To book, call us on <a href="tel:01702553106">01702 553 106</a> or send a message via our <a href="contact.html">contact form</a> and we\'ll get back to you shortly.'
+        maybePersonalize(
+          'To book, call us on <a href="tel:01702553106">01702 553 106</a> or send a message via our <a href="contact.html">contact form</a> and we\'ll get back to you shortly.'
+        )
       );
     }
     if (t.includes('hour') || t.includes('open') || t.includes('close') || t.includes('when are you')) {
       return finalizeReply(
-        'We\'re open Mon&ndash;Fri 9:00&ndash;18:00, with occasional Saturdays. Closed Sundays.'
+        maybePersonalize('We\'re open Mon&ndash;Fri 9:00&ndash;18:00, with occasional Saturdays. Closed Sundays.')
       );
     }
     if (t.includes('address') || t.includes('where') || t.includes('location') || t.includes('find you')) {
       return finalizeReply(
-        'We\'re at 279 London Road, Hadleigh, Essex, SS7 2BN. You\'ll find a map on our <a href="contact.html">Contact page</a>.'
+        maybePersonalize(
+          'We\'re at 279 London Road, Hadleigh, Essex, SS7 2BN. You\'ll find a map on our <a href="contact.html">Contact page</a>.'
+        )
       );
     }
     if (t.includes('park')) {
       return finalizeReply(
-        'There is parking available near the practice on London Road, Hadleigh. For exact directions, see the map on our <a href="contact.html">Contact page</a>.'
+        maybePersonalize(
+          'There is parking available near the practice on London Road, Hadleigh. For exact directions, see the map on our <a href="contact.html">Contact page</a>.'
+        )
       );
     }
     if (t.includes('nhs') || t.includes('band 1') || t.includes('band 2') || t.includes('band 3')) {
       return finalizeReply(
-        'NHS treatment is charged in bands &mdash; Band 1 from &pound;23.80, Band 2 &pound;65.20, Band 3 &pound;282.80. See the full breakdown on our <a href="family-dentistry.html#nhs-pricing">Family Dentistry page</a> or the <a href="about.html#pricing">price list</a>.'
+        maybePersonalize(
+          'NHS treatment is charged in bands &mdash; Band 1 from &pound;23.80, Band 2 &pound;65.20, Band 3 &pound;282.80. See the full breakdown on our <a href="family-dentistry.html#nhs-pricing">Family Dentistry page</a> or the <a href="about.html#pricing">price list</a>.'
+        )
       );
     }
     if (t.includes('finance') || t.includes('payment plan') || t.includes('0%') || t.includes('interest free') || t.includes('monthly')) {
       return finalizeReply(
-        '0% finance is available on treatment from &pound;500. See <a href="about.html#finance">finance options on our About page</a> or ask when you <a href="contact.html">get in touch</a>.'
+        maybePersonalize(
+          '0% finance is available on treatment from &pound;500. See <a href="about.html#finance">finance options on our About page</a> or ask when you <a href="contact.html">get in touch</a>.'
+        )
       );
     }
     if (t.includes('implant')) {
       return finalizeReply(
-        'Dental implants generally start from around &pound;2,000 per tooth. See <a href="dental-implants.html#cost">costs and the 5-step process</a>, or <a href="contact.html">book a free consultation</a>.'
+        maybePersonalize(
+          'Dental implants generally start from around &pound;2,000 per tooth. See <a href="dental-implants.html#cost">costs and the 5-step process</a>, or <a href="contact.html">book a free consultation</a>.'
+        )
       );
     }
     if (t.includes('invisalign') || t.includes('brace') || t.includes('aligner')) {
       return finalizeReply(
-        'We\'re a Platinum Elite Invisalign provider. See the <a href="invisalign.html#five-steps">5-step Invisalign process</a> or <a href="contact.html">book a free consultation</a>.'
+        maybePersonalize(
+          'We\'re a Platinum Elite Invisalign provider. See the <a href="invisalign.html#five-steps">5-step Invisalign process</a> or <a href="contact.html">book a free consultation</a>.'
+        )
       );
     }
     if (t.includes('whiten') || t.includes('bleach')) {
       return finalizeReply(
-        'Teeth whitening starts from as little as &pound;20 per month on interest-free plans. See <a href="teeth-whitening.html#pricing">whitening options and pricing</a>.'
+        maybePersonalize(
+          'Teeth whitening starts from as little as &pound;20 per month on interest-free plans. See <a href="teeth-whitening.html#pricing">whitening options and pricing</a>.'
+        )
       );
     }
     if (t.includes('hygien') || t.includes('scale and polish') || t.includes('direct access')) {
       return finalizeReply(
-        'Direct-access hygiene is available with no referral needed &mdash; visits from &pound;52 for 30 minutes. Learn more on our <a href="hygiene-plus.html#what-we-do">Hygiene Plus page</a>.'
+        maybePersonalize(
+          'Direct-access hygiene is available with no referral needed &mdash; visits from &pound;52 for 30 minutes. Learn more on our <a href="hygiene-plus.html#what-we-do">Hygiene Plus page</a>.'
+        )
       );
     }
     if (t.includes('family') || t.includes('child') || t.includes('children') || t.includes('kids')) {
       return finalizeReply(
-        'We welcome families and children. See <a href="family-dentistry.html#nhs-pricing">Family Dentistry and NHS pricing</a> for more information.'
+        maybePersonalize(
+          'We welcome families and children. See <a href="family-dentistry.html#nhs-pricing">Family Dentistry and NHS pricing</a> for more information.'
+        )
       );
     }
     if (t.includes('price') || t.includes('cost') || t.includes('how much') || t.includes('fee')) {
       return finalizeReply(
-        'Our full price list is on the <a href="about.html#pricing">About page</a> &mdash; everything from check-ups to Invisalign is listed there.'
+        maybePersonalize(
+          'Our full price list is on the <a href="about.html#pricing">About page</a> &mdash; everything from check-ups to Invisalign is listed there.'
+        )
       );
     }
     if (t.includes('new patient') || t.includes('first visit') || t.includes('nervous') || t.includes('haven\'t been') || t.includes('hasnt been')) {
       return finalizeReply(
-        'No pressure at all &mdash; our <a href="new-patients.html">New Patients page</a> covers exactly what to expect at your first visit. Ready to book? Use our <a href="contact.html">contact form</a>.'
+        maybePersonalize(
+          'No pressure at all &mdash; our <a href="new-patients.html">New Patients page</a> covers exactly what to expect at your first visit. Ready to book? Use our <a href="contact.html">contact form</a>.'
+        )
       );
     }
     if (t.includes('cosmetic') || t.includes('botox') || t.includes('filler') || t.includes('dermal')) {
       return finalizeReply(
-        'For smile-focused care see <a href="cosmetic-dentistry.html">Cosmetic Dentistry</a> (Invisalign, implants, whitening). For facial aesthetics see <a href="cosmetic-treatments.html">Cosmetic Treatments</a> (fillers, Botox).'
+        maybePersonalize(
+          'For smile-focused care see <a href="cosmetic-dentistry.html">Cosmetic Dentistry</a> (Invisalign, implants, whitening). For facial aesthetics see <a href="cosmetic-treatments.html">Cosmetic Treatments</a> (fillers, Botox).'
+        )
       );
     }
     if (t.includes('email') || t.includes('info@')) {
       return finalizeReply(
-        'You can email us at <a href="mailto:info@hdp.me.uk">info@hdp.me.uk</a> or use the <a href="contact.html">contact form</a>.'
+        maybePersonalize(
+          'You can email us at <a href="mailto:info@hdp.me.uk">info@hdp.me.uk</a> or use the <a href="contact.html">contact form</a>.'
+        )
       );
     }
     if (t.includes('phone') || t.includes('call') || t.includes('number') || t.includes('01702')) {
       return finalizeReply(
-        'Call us on <a href="tel:01702553106">01702 553 106</a> &mdash; we\'re happy to help with any question.'
+        maybePersonalize(
+          'Call us on <a href="tel:01702553106">01702 553 106</a> &mdash; we\'re happy to help with any question.'
+        )
       );
     }
-    if (t.includes('hi') || t.includes('hello') || t.includes('hey')) {
-      return finalizeReply(
-        'Hi! I\'m Sofia. Pick a topic above or ask me about opening hours, pricing, treatments, or booking &mdash; I\'ll point you to the right place.'
-      );
+    if (isGreeting(userText)) {
+      if (visitorName) {
+        return finalizeReply(
+          `Hi ${escapeHtml(visitorName)}! Pick a topic above or ask me about opening hours, pricing, treatments, or booking &mdash; I\'ll point you to the right place.`
+        );
+      }
+      greetingState = 'awaiting_name';
+      return 'Hi! I\'m Sofia 👋 What\'s your name?';
     }
     return finalizeReply(
-      'I\'m not sure about that one &mdash; I don\'t want to guess. Please call <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a> and our team will help you directly.'
+      maybePersonalize(
+        'I\'m not sure about that one &mdash; I don\'t want to guess. Please call <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a> and our team will help you directly.'
+      )
     );
   }
 
@@ -227,7 +314,11 @@
     messagesEl.classList.add('has-messages');
     const msg = document.createElement('div');
     msg.className = 'chat-msg ' + sender;
-    msg.innerHTML = text;
+    if (sender === 'user') {
+      msg.textContent = text;
+    } else {
+      msg.innerHTML = text;
+    }
     messagesEl.appendChild(msg);
     scrollTranscriptToLatest();
   }
@@ -247,18 +338,54 @@
     if (typing) typing.remove();
   }
 
+  function showOpeningGreeting() {
+    if (hasShownOpeningGreeting) return;
+    hasShownOpeningGreeting = true;
+    greetingState = 'awaiting_name';
+    addMessage('Hi! I\'m Sofia 👋 What\'s your name?', 'bot');
+  }
+
+  function replyWithDelay(replyText) {
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      addMessage(replyText, 'bot');
+      sendBtn.disabled = false;
+    }, 700 + Math.random() * 500);
+  }
+
   function handleSend(text) {
     if (!text.trim()) return;
     addMessage(text, 'user');
     input.value = '';
     sendBtn.disabled = true;
 
-    showTyping();
-    setTimeout(() => {
-      hideTyping();
-      addMessage(getBotReply(text), 'bot');
-      sendBtn.disabled = false;
-    }, 700 + Math.random() * 500);
+    if (greetingState === 'awaiting_name') {
+      if (looksLikeQuestion(text)) {
+        greetingState = 'ready';
+        replyWithDelay(getBotReply(text));
+        return;
+      }
+
+      if (isGreeting(text)) {
+        replyWithDelay('Hi! I\'m Sofia 👋 What\'s your name?');
+        return;
+      }
+
+      const name = extractName(text);
+      if (name) {
+        visitorName = name;
+        greetingState = 'ready';
+        replyWithDelay(`Nice to meet you, ${escapeHtml(name)}! How can I help you today?`);
+        return;
+      }
+
+      greetingState = 'ready';
+      replyWithDelay(getBotReply(text));
+      return;
+    }
+
+    replyWithDelay(getBotReply(text));
   }
 
   form.addEventListener('submit', (e) => {
@@ -269,6 +396,7 @@
   function toggleChat() {
     const isOpen = document.body.classList.toggle('chat-open');
     if (isOpen) {
+      showOpeningGreeting();
       input.focus();
     }
   }
