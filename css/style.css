@@ -1591,31 +1591,6 @@ body.chat-open .chat-panel {
   flex-direction: column;
   background: var(--bg);
 }
-.chat-emergency-bar {
-  background: var(--primary);
-  color: var(--white);
-  padding: 14px 18px;
-  text-align: center;
-  flex-shrink: 0;
-}
-.chat-emergency-label {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(244, 246, 245, 0.72);
-  margin-bottom: 4px;
-}
-.chat-emergency-phone {
-  display: inline-block;
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 600;
-  color: var(--white);
-  text-decoration: none;
-}
-.chat-emergency-phone:hover { color: var(--accent); }
 .chat-menu-intro {
   margin: 0;
   padding: 16px 18px 8px;
@@ -1857,8 +1832,8 @@ body.chat-open .chat-panel {
     left: 20px;
     width: auto;
     bottom: 88px;
-    height: auto;
-    max-height: min(78vh, calc(100dvh - 100px));
+    height: min(75vh, calc(100dvh - 112px));
+    max-height: min(75vh, calc(100dvh - 112px));
   }
 
   .chat-header {
