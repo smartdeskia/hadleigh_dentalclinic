@@ -163,6 +163,16 @@
     return t.includes('hygien') || t.includes('clean') || t.includes('scale') || t.includes('polish');
   }
 
+  function normalizeForMatch(text) {
+    return text.trim().toLowerCase().replace(/[?!.,;:]+$/g, '').trim();
+  }
+
+  function mentionsInvisalign(text) {
+    const t = normalizeForMatch(text);
+    // inv\w*lign covers invisalign, invaslign, and trailing punctuation after normalize.
+    return /inv\w*lign/.test(t) || t.includes('aligner') || t.includes('brace');
+  }
+
   function extractName(text) {
     let cleaned = text.trim().replace(/[!.?]+$/, '').trim();
     if (!cleaned) return null;
@@ -278,7 +288,7 @@
     }
     if (
       (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
-      && (t.includes('invisalign') || t.includes('brace') || t.includes('aligner'))
+      && mentionsInvisalign(userText)
     ) {
       return finalizeReply(
         maybePersonalize(
@@ -339,7 +349,7 @@
         )
       );
     }
-    if (t.includes('invisalign') || t.includes('brace') || t.includes('aligner')) {
+    if (mentionsInvisalign(userText)) {
       return finalizeReply(
         maybePersonalize(
           'We\'re a Platinum Elite Invisalign provider. See the <a href="invisalign.html#five-steps">5-step Invisalign process</a> or <a href="contact.html">book a free consultation</a>.'
