@@ -144,27 +144,112 @@
     return /^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[!.?\s]*$/i.test(t);
   }
 
+  function isThankYou(text) {
+    const t = normalizeForMatch(text);
+    if (/^cheers$/.test(t)) return true;
+    const hasThanks = /\b(thank\s*you|thanks?|thnk|thx)\b/.test(t);
+    const hasBye = /\b(bye|goodbye|good bye)\b/.test(t);
+    const maxWords = hasThanks && hasBye ? 5 : 4;
+    // Short closings only — skip longer messages like "thanks for explaining…"
+    if (t.split(/\s+/).length > maxWords) return false;
+    if (/thanks?\s+(for|about|regarding)\b/.test(t)) return false;
+    if (hasThanks) return true;
+    if (/^(ok(ay)?|great|lovely|perfect)\s+(thank|thnk|thx)/.test(t)) return true;
+    return false;
+  }
+
+  function isBye(text) {
+    const t = normalizeForMatch(text);
+    if (/^(bye|goodbye|good bye|see you|see ya|take care|cheerio)[!.?\s]*$/i.test(t)) return true;
+    if (/^(ok(ay)?|night|goodnight|good night)[!.?\s]*$/i.test(t)) return true;
+    return false;
+  }
+
   function looksLikeQuestion(text) {
     const t = text.toLowerCase();
     if (t.includes('?')) return true;
     return QUESTION_HINTS.some((hint) => t.includes(hint));
   }
 
-  function extractName(text) {
-    let cleaned = text.trim().replace(/^(i'?m|i am|my name is|this is|it'?s|call me)\s+/i, '').trim();
-    cleaned = cleaned.replace(/[!.?]+$/, '').trim();
-    if (!cleaned || cleaned.length > 40 || cleaned.split(/\s+/).length > 3) return null;
-    if (looksLikeQuestion(cleaned) || isGreeting(cleaned)) return null;
-    return cleaned
+  function mentionsCleaning(text) {
+    const t = text.toLowerCase();
+    // "clean" covers cleaning/cleanings and typos like "teetgh cleaning" (no exact "teeth" required).
+    return t.includes('hygien') || t.includes('clean') || t.includes('scale') || t.includes('polish');
+  }
+
+  function normalizeForMatch(text) {
+    return text.trim().toLowerCase().replace(/[?!.,;:]+$/g, '').trim();
+  }
+
+  function mentionsInvisalign(text) {
+    const t = normalizeForMatch(text);
+    // inv\w*lign covers invisalign, invaslign, and trailing punctuation after normalize.
+    return /inv\w*lign/.test(t) || t.includes('aligner') || t.includes('brace');
+  }
+
+  function isBotName(text) {
+    const t = text.trim().toLowerCase();
+    return t === 'sofia' || t === 'sophie';
+  }
+
+  function formatName(text) {
+    return text
       .split(/\s+/)
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
       .join(' ');
   }
 
+  function extractName(text) {
+    let cleaned = text.trim().replace(/[!.?]+$/, '').trim();
+    if (!cleaned) return null;
+
+    let fromExplicitIntro = false;
+
+    // "name is" anywhere — handles typos ("may name is Rich") and extra lead-ins ("Hi my name is Sophie").
+    const nameIsMatch = cleaned.match(/\bname is\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i);
+    if (nameIsMatch) {
+      cleaned = nameIsMatch[1].trim();
+      fromExplicitIntro = true;
+    } else {
+      const explicitMatch = cleaned.match(
+        /(?:i am|i'?m|im|it'?s|its|this is|call me)\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i
+      );
+      if (explicitMatch) {
+        cleaned = explicitMatch[1].trim();
+        fromExplicitIntro = true;
+      } else {
+        const leadPatterns = [
+          /^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[,!\s]+/i,
+          /^(hi|hello|hey|hiya)$/i,
+          /^(i am|i'?m|im)\s+/i,
+          /^(this is|it'?s|its|call me)\s+/i,
+        ];
+        let changed = true;
+        while (changed) {
+          changed = false;
+          for (const pattern of leadPatterns) {
+            const next = cleaned.replace(pattern, '').trim();
+            if (next !== cleaned) {
+              cleaned = next;
+              changed = true;
+            }
+          }
+        }
+      }
+    }
+
+    cleaned = cleaned.replace(/[!.?]+$/, '').trim();
+    if (!cleaned || cleaned.length > 40 || cleaned.split(/\s+/).length > 3) return null;
+    if (looksLikeQuestion(cleaned) || isGreeting(cleaned)) return null;
+    if (!fromExplicitIntro && isBotName(cleaned)) return null;
+
+    return formatName(cleaned);
+  }
+
   function maybePersonalize(text) {
     if (!visitorName) return text;
-    if (text.startsWith('I\'m not sure')) {
-      return text.replace('I\'m not sure', `I'm not sure, ${escapeHtml(visitorName)},`);
+    if (text.startsWith('That\'s a great question')) {
+      return text.replace('That\'s a great question', `That's a great question, ${escapeHtml(visitorName)},`);
     }
     return text;
   }
@@ -193,6 +278,12 @@
         )
       );
     }
+    if (isThankYou(userText)) {
+      return 'You\'re welcome! Let us know if there\'s anything else I can help with.';
+    }
+    if (isBye(userText)) {
+      return 'Goodbye! Take care &mdash; we\'re here whenever you need us.';
+    }
     if (t.includes('reschedule') || t.includes('change my appointment') || t.includes('move my appointment')) {
       return finalizeReply(
         maybePersonalize(
@@ -209,7 +300,7 @@
     }
     if (
       (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
-      && (t.includes('hygien') || t.includes('clean') || t.includes('scale') || t.includes('polish') || t.includes('teeth cleaning'))
+      && mentionsCleaning(userText)
     ) {
       return finalizeReply(
         maybePersonalize(
@@ -229,7 +320,7 @@
     }
     if (
       (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
-      && (t.includes('invisalign') || t.includes('brace') || t.includes('aligner'))
+      && mentionsInvisalign(userText)
     ) {
       return finalizeReply(
         maybePersonalize(
@@ -290,7 +381,7 @@
         )
       );
     }
-    if (t.includes('invisalign') || t.includes('brace') || t.includes('aligner')) {
+    if (mentionsInvisalign(userText)) {
       return finalizeReply(
         maybePersonalize(
           'We\'re a Platinum Elite Invisalign provider. See the <a href="invisalign.html#five-steps">5-step Invisalign process</a> or <a href="contact.html">book a free consultation</a>.'
@@ -304,7 +395,7 @@
         )
       );
     }
-    if (t.includes('hygien') || t.includes('scale and polish') || t.includes('direct access')) {
+    if (mentionsCleaning(userText) || t.includes('direct access')) {
       return finalizeReply(
         maybePersonalize(
           'Direct-access hygiene is available with no referral needed &mdash; visits from &pound;52 for 30 minutes. Learn more on our <a href="hygiene-plus.html#what-we-do">Hygiene Plus page</a>.'
@@ -364,7 +455,7 @@
     }
     return finalizeReply(
       maybePersonalize(
-        'I\'m not sure about that one &mdash; I don\'t want to guess. Please call <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a> and our team will help you directly.'
+        'That\'s a great question &mdash; I don\'t have the specific details on hand, but our team can help with almost anything dental, from routine check-ups to cosmetic treatments like Invisalign and whitening. For a precise answer, call us on <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a> and we\'ll get back to you directly.'
       )
     );
   }
@@ -424,23 +515,24 @@
     input.value = '';
     sendBtn.disabled = true;
 
-    if (greetingState === 'awaiting_name') {
+    if (greetingState === 'awaiting_name' || greetingState === 'awaiting_name_retry') {
+      const name = extractName(text);
+      if (name) {
+        visitorName = name;
+        greetingState = 'ready';
+        replyWithDelay(`Nice to meet you, ${escapeHtml(name)}! How can I help you today?`);
+        return;
+      }
+
       if (looksLikeQuestion(text)) {
         greetingState = 'ready';
         replyWithDelay(getBotReply(text));
         return;
       }
 
-      if (isGreeting(text)) {
-        replyWithDelay('Hi! I\'m Sofia 👋 What\'s your name?');
-        return;
-      }
-
-      const name = extractName(text);
-      if (name) {
-        visitorName = name;
-        greetingState = 'ready';
-        replyWithDelay(`Nice to meet you, ${escapeHtml(name)}! How can I help you today?`);
+      if (greetingState === 'awaiting_name') {
+        greetingState = 'awaiting_name_retry';
+        replyWithDelay('I didn\'t quite catch your name &mdash; what should I call you?');
         return;
       }
 
