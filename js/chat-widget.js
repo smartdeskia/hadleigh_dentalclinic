@@ -169,6 +169,20 @@
     return text;
   }
 
+  function getGeneralBookingReply() {
+    return maybePersonalize(
+      'We offer a range of treatments, including:' +
+      '<ul>' +
+      '<li>General Dentistry (check-ups, fillings, root canal)</li>' +
+      '<li>Invisalign</li>' +
+      '<li>Teeth Whitening</li>' +
+      '<li>Dental Implants</li>' +
+      '<li>Dental Hygiene (no referral needed)</li>' +
+      '</ul>' +
+      'To book, call us on <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a> and let us know which you\'re interested in.'
+    );
+  }
+
   function getBotReply(userText) {
     const t = userText.toLowerCase();
 
@@ -234,11 +248,7 @@
       );
     }
     if (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule'))) {
-      return finalizeReply(
-        maybePersonalize(
-          'To book, call us on <a href="tel:01702553106">01702 553 106</a> or send a message via our <a href="contact.html">contact form</a> and we\'ll get back to you shortly.'
-        )
-      );
+      return finalizeReply(getGeneralBookingReply());
     }
     if (t.includes('hour') || t.includes('open') || t.includes('close') || t.includes('when are you')) {
       return finalizeReply(
