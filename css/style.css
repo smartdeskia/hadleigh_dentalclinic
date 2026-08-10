@@ -1637,20 +1637,6 @@ body.chat-open .chat-panel {
 .chat-menu-item-urgent .chat-menu-item-title {
   color: #b84a3a;
 }
-.chat-ask-divider {
-  padding: 14px 18px 10px;
-  border-top: 1px solid var(--line);
-  flex-shrink: 0;
-  background: var(--bg);
-}
-.chat-ask-divider span {
-  display: block;
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
 .chat-transcript {
   display: none;
   flex-direction: column;
