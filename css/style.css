@@ -193,12 +193,22 @@ section:has(> .full-bleed) + section:not([class*="cta"]):not([style*="background
 .pre-footer-cta + .site-footer {
   margin-top: 0;
 }
+/* Treatment/content section → footer: avoid double gap (section padding + footer margin) */
+section:has(+ .site-footer) {
+  padding-bottom: 32px;
+}
+section:has(+ .site-footer) + .site-footer {
+  margin-top: 0;
+}
 @media (max-width: 900px) {
   .cta-section:has(+ .site-footer) {
     padding-bottom: 48px;
   }
   .cta-section + .site-footer .footer-grid {
     padding-top: 40px;
+  }
+  section:has(+ .site-footer) {
+    padding-bottom: 24px;
   }
 }
 
@@ -1165,6 +1175,15 @@ textarea { resize: vertical; min-height: 120px; }
 }
 .footer-bottom a { color: rgba(244, 246, 245, 0.55); }
 .footer-bottom a:hover { color: var(--white); }
+
+@media (max-width: 768px) {
+  .site-footer {
+    padding-bottom: max(96px, calc(32px + env(safe-area-inset-bottom, 0px)));
+  }
+  .footer-grid > div:first-child {
+    padding-right: 76px;
+  }
+}
 
 /* ---- Utility ---- */
 .text-center { text-align: center; }
