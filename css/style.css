@@ -1537,6 +1537,8 @@ body.chat-open .chat-panel {
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 2;
 }
 .chat-avatar {
   width: 38px; height: 38px;
@@ -1849,12 +1851,47 @@ body.chat-open .chat-panel {
 .chat-send-btn svg { width: 16px; height: 16px; }
 .chat-send-btn:disabled { opacity: 0.5; cursor: default; }
 
+@media (max-width: 768px) {
+  .chat-panel {
+    right: 20px;
+    left: 20px;
+    width: auto;
+    bottom: 88px;
+    height: auto;
+    max-height: min(78vh, calc(100dvh - 100px));
+  }
+
+  .chat-header {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    flex-shrink: 0;
+  }
+
+  .chat-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .chat-transcript.has-messages {
+    flex: 0 1 auto;
+    max-height: 32vh;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .chat-input-row {
+    flex-shrink: 0;
+  }
+}
+
 @media (max-width: 500px) {
   .chat-panel {
     right: 16px;
     left: 16px;
-    width: auto;
-    bottom: 88px;
   }
   .chat-launcher { right: 16px; bottom: 16px; }
 }
