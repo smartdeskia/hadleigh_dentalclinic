@@ -154,25 +154,31 @@
     let cleaned = text.trim().replace(/[!.?]+$/, '').trim();
     if (!cleaned) return null;
 
-    const explicitMatch = cleaned.match(
-      /(?:my name is|i am|i'?m|im|it'?s|its|this is|call me)\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i
-    );
-    if (explicitMatch) {
-      cleaned = explicitMatch[1].trim();
+    // "name is" anywhere — handles typos ("may name is Rich") and extra lead-ins ("Hi my name is Sophie").
+    const nameIsMatch = cleaned.match(/\bname is\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i);
+    if (nameIsMatch) {
+      cleaned = nameIsMatch[1].trim();
     } else {
-      const leadPatterns = [
-        /^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[,!\s]+/i,
-        /^(i am|i'?m|im)\s+/i,
-        /^(my name is|this is|it'?s|its|call me)\s+/i,
-      ];
-      let changed = true;
-      while (changed) {
-        changed = false;
-        for (const pattern of leadPatterns) {
-          const next = cleaned.replace(pattern, '').trim();
-          if (next !== cleaned) {
-            cleaned = next;
-            changed = true;
+      const explicitMatch = cleaned.match(
+        /(?:i am|i'?m|im|it'?s|its|this is|call me)\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i
+      );
+      if (explicitMatch) {
+        cleaned = explicitMatch[1].trim();
+      } else {
+        const leadPatterns = [
+          /^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[,!\s]+/i,
+          /^(i am|i'?m|im)\s+/i,
+          /^(this is|it'?s|its|call me)\s+/i,
+        ];
+        let changed = true;
+        while (changed) {
+          changed = false;
+          for (const pattern of leadPatterns) {
+            const next = cleaned.replace(pattern, '').trim();
+            if (next !== cleaned) {
+              cleaned = next;
+              changed = true;
+            }
           }
         }
       }
