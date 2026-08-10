@@ -1520,6 +1520,76 @@ textarea { resize: vertical; min-height: 120px; }
 .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s ease, transform 0.5s ease; }
 .reveal.in { opacity: 1; transform: translateY(0); }
 
+/* ---- Cookie consent banner ---- */
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 190;
+  background: var(--primary);
+  color: rgba(244, 246, 245, 0.9);
+  border-top: 1px solid rgba(244, 246, 245, 0.12);
+  box-shadow: 0 -8px 28px rgba(23, 51, 46, 0.18);
+  padding: 16px 24px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+}
+.cookie-banner-inner {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-right: 72px;
+}
+.cookie-banner-text {
+  margin: 0;
+  flex: 1;
+  min-width: min(100%, 280px);
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: rgba(244, 246, 245, 0.88);
+}
+.cookie-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.cookie-banner .btn-outline {
+  border-color: rgba(244, 246, 245, 0.4);
+  color: var(--white);
+}
+.cookie-banner .btn-outline:hover {
+  background: rgba(244, 246, 245, 0.1);
+  border-color: var(--white);
+  color: var(--white);
+}
+body.cookie-banner-visible .chat-launcher {
+  bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+@media (max-width: 768px) {
+  .cookie-banner {
+    padding: 14px 16px;
+    padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
+  }
+  .cookie-banner-inner {
+    flex-direction: column;
+    align-items: stretch;
+    padding-right: 0;
+    gap: 14px;
+  }
+  .cookie-banner-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+  body.cookie-banner-visible .chat-launcher {
+    bottom: calc(108px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
 /* ==========================================================================
    Chat Widget — Sofia (website assistant)
    ========================================================================== */
