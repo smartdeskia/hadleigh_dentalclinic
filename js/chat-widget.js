@@ -145,9 +145,15 @@
   }
 
   function isThankYou(text) {
-    const t = text.trim().toLowerCase().replace(/[!.?]+$/, '').trim();
-    if (/^(thank you|thanks|thankyou|cheers)$/.test(t)) return true;
-    if (/^(ok(ay)?|great|lovely|perfect)\s+(thanks|thank you|thankyou|cheers)$/.test(t)) return true;
+    const t = normalizeForMatch(text);
+    if (/^cheers$/.test(t)) return true;
+    // Short closings only — skip longer messages like "thanks for explaining…"
+    if (t.split(/\s+/).length > 4) return false;
+    if (/thanks?\s+(for|about|regarding)\b/.test(t)) return false;
+    if (/\bthank\s*you\b/.test(t) || /\bthanks?\b/.test(t) || /\bthnk\b/.test(t) || /\bthx\b/.test(t)) {
+      return true;
+    }
+    if (/^(ok(ay)?|great|lovely|perfect)\s+(thank|thnk|thx)/.test(t)) return true;
     return false;
   }
 
