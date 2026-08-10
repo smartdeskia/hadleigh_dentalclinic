@@ -67,7 +67,7 @@
   let greetingState = 'idle';
   let hasShownOpeningGreeting = false;
 
-  panel.querySelectorAll('#chat-messages, #chat-quick-replies, #chat-input-form, .chat-body, .chat-ask-divider, .chat-transcript').forEach((el) => {
+  panel.querySelectorAll('#chat-messages, #chat-quick-replies, #chat-input-form, .chat-body, .chat-transcript').forEach((el) => {
     el.remove();
   });
 
@@ -98,11 +98,6 @@
     });
     menuList.appendChild(link);
   });
-
-  const askDivider = document.createElement('div');
-  askDivider.className = 'chat-ask-divider';
-  askDivider.innerHTML = '<span>Or ask your own question</span>';
-  panel.appendChild(askDivider);
 
   const messagesEl = document.createElement('div');
   messagesEl.id = 'chat-messages';
