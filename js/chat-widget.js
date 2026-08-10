@@ -74,10 +74,6 @@
   const chatBody = document.createElement('div');
   chatBody.className = 'chat-body';
   chatBody.innerHTML = `
-    <div class="chat-emergency-bar">
-      <span class="chat-emergency-label">Urgent? Call now</span>
-      <a class="chat-emergency-phone" href="tel:01702553106">01702 553 106</a>
-    </div>
     <p class="chat-menu-intro">Choose a topic below and we'll take you straight to the right place.</p>
     <nav class="chat-menu-list" aria-label="Help topics"></nav>
   `;
@@ -553,7 +549,6 @@
     const isOpen = document.body.classList.toggle('chat-open');
     if (isOpen) {
       showOpeningGreeting();
-      input.focus();
     }
   }
 
