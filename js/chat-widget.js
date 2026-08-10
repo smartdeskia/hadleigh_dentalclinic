@@ -179,7 +179,14 @@
         )
       );
     }
-    if (t.includes('cancel') || t.includes('reschedule') || t.includes('change my appointment') || t.includes('move my appointment')) {
+    if (t.includes('reschedule') || t.includes('change my appointment') || t.includes('move my appointment')) {
+      return finalizeReply(
+        maybePersonalize(
+          'I\'m not able to reschedule appointments directly here — please call us on <a href="tel:01702553106">01702 553 106</a> and our team can help right away, or use our <a href="contact.html">contact form</a> and mention you\'d like to reschedule.'
+        )
+      );
+    }
+    if (t.includes('cancel')) {
       return finalizeReply(
         maybePersonalize(
           'I\'m not able to cancel appointments directly here — please call us on <a href="tel:01702553106">01702 553 106</a> and our team can help right away, or use our <a href="contact.html">contact form</a> and mention you\'d like to cancel.'
@@ -187,7 +194,7 @@
       );
     }
     if (
-      (t.includes('book') || t.includes('appointment') || t.includes('schedule') || t.includes('consult'))
+      (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
       && (t.includes('hygien') || t.includes('clean') || t.includes('scale') || t.includes('polish') || t.includes('teeth cleaning'))
     ) {
       return finalizeReply(
@@ -197,7 +204,7 @@
       );
     }
     if (
-      (t.includes('book') || t.includes('appointment') || t.includes('schedule') || t.includes('consult'))
+      (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
       && (t.includes('implant'))
     ) {
       return finalizeReply(
@@ -207,7 +214,7 @@
       );
     }
     if (
-      (t.includes('book') || t.includes('appointment') || t.includes('schedule') || t.includes('consult'))
+      (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
       && (t.includes('invisalign') || t.includes('brace') || t.includes('aligner'))
     ) {
       return finalizeReply(
@@ -217,7 +224,7 @@
       );
     }
     if (
-      (t.includes('book') || t.includes('appointment') || t.includes('schedule') || t.includes('consult'))
+      (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
       && (t.includes('whiten') || t.includes('bleach'))
     ) {
       return finalizeReply(
@@ -226,7 +233,7 @@
         )
       );
     }
-    if (t.includes('book') || t.includes('appointment') || t.includes('consult') || t.includes('schedule')) {
+    if (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule'))) {
       return finalizeReply(
         maybePersonalize(
           'To book, call us on <a href="tel:01702553106">01702 553 106</a> or send a message via our <a href="contact.html">contact form</a> and we\'ll get back to you shortly.'
