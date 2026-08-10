@@ -1693,6 +1693,11 @@ body.chat-open .chat-panel {
 }
 .chat-msg a { color: var(--accent); text-decoration: underline; }
 .chat-msg.bot a { color: var(--secondary); font-weight: 600; }
+.chat-msg.bot ul {
+  margin: 8px 0 10px;
+  padding-left: 18px;
+}
+.chat-msg.bot li + li { margin-top: 4px; }
 
 .chat-typing {
   align-self: flex-start;
