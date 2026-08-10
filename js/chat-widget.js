@@ -147,13 +147,21 @@
   function isThankYou(text) {
     const t = normalizeForMatch(text);
     if (/^cheers$/.test(t)) return true;
+    const hasThanks = /\b(thank\s*you|thanks?|thnk|thx)\b/.test(t);
+    const hasBye = /\b(bye|goodbye|good bye)\b/.test(t);
+    const maxWords = hasThanks && hasBye ? 5 : 4;
     // Short closings only — skip longer messages like "thanks for explaining…"
-    if (t.split(/\s+/).length > 4) return false;
+    if (t.split(/\s+/).length > maxWords) return false;
     if (/thanks?\s+(for|about|regarding)\b/.test(t)) return false;
-    if (/\bthank\s*you\b/.test(t) || /\bthanks?\b/.test(t) || /\bthnk\b/.test(t) || /\bthx\b/.test(t)) {
-      return true;
-    }
+    if (hasThanks) return true;
     if (/^(ok(ay)?|great|lovely|perfect)\s+(thank|thnk|thx)/.test(t)) return true;
+    return false;
+  }
+
+  function isBye(text) {
+    const t = normalizeForMatch(text);
+    if (/^(bye|goodbye|good bye|see you|see ya|take care|cheerio)[!.?\s]*$/i.test(t)) return true;
+    if (/^(ok(ay)?|night|goodnight|good night)[!.?\s]*$/i.test(t)) return true;
     return false;
   }
 
@@ -272,6 +280,9 @@
     }
     if (isThankYou(userText)) {
       return 'You\'re welcome! Let us know if there\'s anything else I can help with.';
+    }
+    if (isBye(userText)) {
+      return 'Goodbye! Take care &mdash; we\'re here whenever you need us.';
     }
     if (t.includes('reschedule') || t.includes('change my appointment') || t.includes('move my appointment')) {
       return finalizeReply(
