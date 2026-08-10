@@ -151,10 +151,37 @@
   }
 
   function extractName(text) {
-    let cleaned = text.trim().replace(/^(i'?m|i am|my name is|this is|it'?s|call me)\s+/i, '').trim();
+    let cleaned = text.trim().replace(/[!.?]+$/, '').trim();
+    if (!cleaned) return null;
+
+    const explicitMatch = cleaned.match(
+      /(?:my name is|i am|i'?m|im|it'?s|its|this is|call me)\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i
+    );
+    if (explicitMatch) {
+      cleaned = explicitMatch[1].trim();
+    } else {
+      const leadPatterns = [
+        /^(hi|hello|hey|hiya|good morning|good afternoon|good evening)[,!\s]+/i,
+        /^(i am|i'?m|im)\s+/i,
+        /^(my name is|this is|it'?s|its|call me)\s+/i,
+      ];
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const pattern of leadPatterns) {
+          const next = cleaned.replace(pattern, '').trim();
+          if (next !== cleaned) {
+            cleaned = next;
+            changed = true;
+          }
+        }
+      }
+    }
+
     cleaned = cleaned.replace(/[!.?]+$/, '').trim();
     if (!cleaned || cleaned.length > 40 || cleaned.split(/\s+/).length > 3) return null;
     if (looksLikeQuestion(cleaned) || isGreeting(cleaned)) return null;
+
     return cleaned
       .split(/\s+/)
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
@@ -425,9 +452,11 @@
     sendBtn.disabled = true;
 
     if (greetingState === 'awaiting_name') {
-      if (looksLikeQuestion(text)) {
+      const name = extractName(text);
+      if (name) {
+        visitorName = name;
         greetingState = 'ready';
-        replyWithDelay(getBotReply(text));
+        replyWithDelay(`Nice to meet you, ${escapeHtml(name)}! How can I help you today?`);
         return;
       }
 
@@ -436,11 +465,9 @@
         return;
       }
 
-      const name = extractName(text);
-      if (name) {
-        visitorName = name;
+      if (looksLikeQuestion(text)) {
         greetingState = 'ready';
-        replyWithDelay(`Nice to meet you, ${escapeHtml(name)}! How can I help you today?`);
+        replyWithDelay(getBotReply(text));
         return;
       }
 
