@@ -69,7 +69,6 @@
     </div>
     <p class="chat-menu-intro">Choose a topic below and we'll take you straight to the right place.</p>
     <nav class="chat-menu-list" aria-label="Help topics"></nav>
-    <div class="chat-ask-divider"><span>Or ask your own question</span></div>
   `;
   panel.appendChild(chatBody);
 
@@ -89,11 +88,16 @@
     menuList.appendChild(link);
   });
 
+  const askDivider = document.createElement('div');
+  askDivider.className = 'chat-ask-divider';
+  askDivider.innerHTML = '<span>Or ask your own question</span>';
+  panel.appendChild(askDivider);
+
   const messagesEl = document.createElement('div');
   messagesEl.id = 'chat-messages';
-  messagesEl.className = 'chat-messages chat-messages-inline';
+  messagesEl.className = 'chat-transcript';
   messagesEl.setAttribute('aria-live', 'polite');
-  chatBody.appendChild(messagesEl);
+  panel.appendChild(messagesEl);
 
   const form = document.createElement('form');
   form.id = 'chat-input-form';
@@ -214,14 +218,18 @@
     );
   }
 
+  function scrollTranscriptToLatest() {
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    messagesEl.lastElementChild?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
   function addMessage(text, sender) {
     messagesEl.classList.add('has-messages');
     const msg = document.createElement('div');
     msg.className = 'chat-msg ' + sender;
     msg.innerHTML = text;
     messagesEl.appendChild(msg);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    chatBody.scrollTop = chatBody.scrollHeight;
+    scrollTranscriptToLatest();
   }
 
   function showTyping() {
@@ -231,7 +239,7 @@
     typing.innerHTML = '<span></span><span></span><span></span>';
     messagesEl.appendChild(typing);
     messagesEl.classList.add('has-messages');
-    messagesEl.scrollTop = messagesEl.scrollHeight;
+    scrollTranscriptToLatest();
   }
 
   function hideTyping() {
