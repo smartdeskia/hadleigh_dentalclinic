@@ -203,8 +203,8 @@
 
   function maybePersonalize(text) {
     if (!visitorName) return text;
-    if (text.startsWith('I\'m not sure')) {
-      return text.replace('I\'m not sure', `I'm not sure, ${escapeHtml(visitorName)},`);
+    if (text.startsWith('That\'s a great question')) {
+      return text.replace('That\'s a great question', `That's a great question, ${escapeHtml(visitorName)},`);
     }
     return text;
   }
@@ -407,7 +407,7 @@
     }
     return finalizeReply(
       maybePersonalize(
-        'I\'m not sure about that one &mdash; I don\'t want to guess. Please call <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a> and our team will help you directly.'
+        'That\'s a great question &mdash; I don\'t have the specific details on hand, but our team can help with almost anything dental, from routine check-ups to cosmetic treatments like Invisalign and whitening. For a precise answer, call us on <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a> and we\'ll get back to you directly.'
       )
     );
   }
