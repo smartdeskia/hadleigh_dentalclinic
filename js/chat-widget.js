@@ -127,6 +127,11 @@
       .replace(/"/g, '&quot;');
   }
 
+  function formatBotReply(text) {
+    // Safety net: convert any markdown links to HTML (replies should use HTML directly).
+    return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+  }
+
   function finalizeReply(text) {
     if (text.includes('contact.html') || text.includes('tel:01702553106')) {
       return text;
@@ -174,7 +179,54 @@
         )
       );
     }
-    if (t.includes('book') || t.includes('appointment') || t.includes('consult')) {
+    if (t.includes('cancel') || t.includes('reschedule') || t.includes('change my appointment') || t.includes('move my appointment')) {
+      return finalizeReply(
+        maybePersonalize(
+          'I\'m not able to cancel appointments directly here — please call us on <a href="tel:01702553106">01702 553 106</a> and our team can help right away, or use our <a href="contact.html">contact form</a> and mention you\'d like to cancel.'
+        )
+      );
+    }
+    if (
+      (t.includes('book') || t.includes('appointment') || t.includes('schedule') || t.includes('consult'))
+      && (t.includes('hygien') || t.includes('clean') || t.includes('scale') || t.includes('polish') || t.includes('teeth cleaning'))
+    ) {
+      return finalizeReply(
+        maybePersonalize(
+          'Direct-access hygiene is available with no referral needed — visits from &pound;52 for 30 minutes. See our <a href="hygiene-plus.html#what-we-do">Hygiene Plus page</a>, then <a href="contact.html">get in touch to book</a>.'
+        )
+      );
+    }
+    if (
+      (t.includes('book') || t.includes('appointment') || t.includes('schedule') || t.includes('consult'))
+      && (t.includes('implant'))
+    ) {
+      return finalizeReply(
+        maybePersonalize(
+          'Dental implants generally start from around &pound;2,000 per tooth. See <a href="dental-implants.html#cost">costs and the 5-step process</a>, then <a href="contact.html">book a free consultation</a>.'
+        )
+      );
+    }
+    if (
+      (t.includes('book') || t.includes('appointment') || t.includes('schedule') || t.includes('consult'))
+      && (t.includes('invisalign') || t.includes('brace') || t.includes('aligner'))
+    ) {
+      return finalizeReply(
+        maybePersonalize(
+          'We\'re a Platinum Elite Invisalign provider. See the <a href="invisalign.html#five-steps">5-step Invisalign process</a>, then <a href="contact.html">book a free consultation</a>.'
+        )
+      );
+    }
+    if (
+      (t.includes('book') || t.includes('appointment') || t.includes('schedule') || t.includes('consult'))
+      && (t.includes('whiten') || t.includes('bleach'))
+    ) {
+      return finalizeReply(
+        maybePersonalize(
+          'Teeth whitening starts from as little as &pound;20 per month on interest-free plans. See <a href="teeth-whitening.html#pricing">whitening options and pricing</a>, then <a href="contact.html">get in touch to book</a>.'
+        )
+      );
+    }
+    if (t.includes('book') || t.includes('appointment') || t.includes('consult') || t.includes('schedule')) {
       return finalizeReply(
         maybePersonalize(
           'To book, call us on <a href="tel:01702553106">01702 553 106</a> or send a message via our <a href="contact.html">contact form</a> and we\'ll get back to you shortly.'
@@ -312,7 +364,7 @@
     if (sender === 'user') {
       msg.textContent = text;
     } else {
-      msg.innerHTML = text;
+      msg.innerHTML = formatBotReply(text);
     }
     messagesEl.appendChild(msg);
     scrollTranscriptToLatest();
