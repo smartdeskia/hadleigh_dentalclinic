@@ -977,15 +977,15 @@ section:has(+ .site-footer) + .site-footer {
 @media (max-width: 768px) {
   .treatment-cta-buttons {
     flex-direction: column;
-    align-items: stretch;
+    align-items: center;
     gap: 12px;
     margin-top: 40px;
   }
   .treatment-cta-buttons .btn {
-    width: 100%;
+    width: auto;
+    max-width: 100%;
+    padding: 12px 22px;
     justify-content: center;
-    white-space: normal;
-    text-align: center;
   }
 }
 
