@@ -270,6 +270,21 @@
     });
   }
 
+  function confirmContactValue(val, contactType) {
+    bookingState = null;
+    const label = contactType === 'phone' ? 'number' : 'email address';
+    replyWithDelay(`Just to confirm — is <strong>${val}</strong> the right ${label}?`, () => {
+      addQuickReplies(['Yes, that\'s right', 'No, let me retype it'], (choice) => {
+        if (choice === 'Yes, that\'s right') {
+          reviewBookingIntent(val, contactType);
+        } else {
+          bookingState = contactType === 'phone' ? 'awaiting-phone' : 'awaiting-email';
+          replyWithDelay(contactType === 'phone' ? 'What number should I send it to?' : 'What email address should I send it to?');
+        }
+      });
+    });
+  }
+
   function reviewBookingIntent(contactValue, contactType) {
     bookingState = null;
     bookingIntentData.contactType = contactType;
@@ -353,14 +368,14 @@
       const digits = val.replace(/[^0-9]/g, '');
       const looksValid = /^[0-9+()\s-]{7,}$/.test(val) && digits.length >= 7;
       if (!looksValid) { replyWithDelay("That doesn't look like a valid phone number — could you try again?"); return; }
-      reviewBookingIntent(val, 'phone');
+      confirmContactValue(val, 'phone');
       return;
     }
     if (bookingState === 'awaiting-email') {
-      const val = text.trim();
+      const val = text.trim().toLowerCase();
       const looksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
       if (!looksValid) { replyWithDelay("That doesn't look like a valid email address — could you try again?"); return; }
-      reviewBookingIntent(val, 'email');
+      confirmContactValue(val, 'email');
       return;
     }
     if (!visitorName) {
