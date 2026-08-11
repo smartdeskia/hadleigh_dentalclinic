@@ -1831,6 +1831,14 @@ body.chat-open .chat-panel {
   overflow-y: auto;
 }
 
+.chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
+  flex: 0 0 auto;
+  max-height: none;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 6px 16px 8px;
+}
+
 .chat-panel:has(.chat-transcript.has-messages) .chat-menu-intro {
   padding: 8px 16px 4px;
 }
@@ -1847,12 +1855,6 @@ body.chat-open .chat-panel {
 .chat-panel:has(.chat-transcript.has-messages) .chat-menu-item-desc {
   font-size: 0.72rem;
   line-height: 1.25;
-}
-
-.chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
-  flex: 0 0 auto;
-  max-height: none;
-  padding: 6px 16px 2px;
 }
 
 @media (min-width: 768px) {
@@ -1881,9 +1883,9 @@ body.chat-open .chat-panel {
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
     flex: 0 0 auto;
-    max-height: none;
+    max-height: min(180px, 28vh);
     min-height: 0;
-    overflow-y: visible;
+    overflow-y: auto;
     padding: 6px 16px 8px;
   }
 
@@ -2136,14 +2138,16 @@ body.chat-open .chat-panel {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .chat-transcript.has-messages {
+  .chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
     flex: 0 0 auto;
-    max-height: none;
-    min-height: 0;
-    overflow-y: visible;
+    max-height: min(200px, 32vh);
+    min-height: 52px;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    border-top: 1px solid var(--line);
   }
 
   .chat-quick-replies.is-visible {
@@ -2165,14 +2169,16 @@ body.chat-open .chat-panel {
   }
 
   body.chat-booking-active .chat-body {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden;
   }
 
   body.chat-booking-active .chat-transcript.has-messages {
     flex: 1 1 auto;
     max-height: none;
+    min-height: 0;
+    overflow-y: auto;
   }
 }
 

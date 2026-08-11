@@ -152,7 +152,6 @@
   messagesEl.id = 'chat-messages';
   messagesEl.className = 'chat-transcript';
   messagesEl.setAttribute('aria-live', 'polite');
-  chatBody.appendChild(messagesEl);
 
   const form = document.createElement('form');
   form.id = 'chat-input-form';
@@ -171,6 +170,7 @@
   chatFooter.className = 'chat-footer';
   chatFooter.appendChild(quickRepliesEl);
   chatFooter.appendChild(form);
+  panel.appendChild(messagesEl);
   panel.appendChild(chatFooter);
 
   const refreshBtn = document.createElement('button');
@@ -527,7 +527,7 @@
 
   function scrollTranscriptToLatest() {
     messagesEl.scrollTop = messagesEl.scrollHeight;
-    messagesEl.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    messagesEl.lastElementChild?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
   function ensureInputVisible() {
