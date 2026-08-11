@@ -123,23 +123,13 @@
     el.remove();
   });
 
-  const chatMain = document.createElement('div');
-  chatMain.className = 'chat-main';
-
-  const focusOverlay = document.createElement('div');
-  focusOverlay.className = 'chat-focus-overlay';
-  focusOverlay.setAttribute('aria-hidden', 'true');
-  focusOverlay.hidden = true;
-
   const chatBody = document.createElement('div');
   chatBody.className = 'chat-body';
   chatBody.innerHTML = `
     <p class="chat-menu-intro">Tap an option below to get started.</p>
     <nav class="chat-menu-list" aria-label="Help topics"></nav>
   `;
-  panel.querySelector('.chat-header').insertAdjacentElement('afterend', chatMain);
-  chatMain.appendChild(focusOverlay);
-  chatMain.appendChild(chatBody);
+  panel.appendChild(chatBody);
 
   const menuList = chatBody.querySelector('.chat-menu-list');
   MENU_ITEMS.forEach((item) => {
@@ -182,7 +172,7 @@
   chatFooter.className = 'chat-footer';
   chatFooter.appendChild(quickRepliesEl);
   chatFooter.appendChild(form);
-  chatMain.appendChild(messagesEl);
+  panel.appendChild(messagesEl);
   panel.appendChild(chatFooter);
 
   if (!refreshBtn) {
@@ -206,11 +196,6 @@
 
   const input = form.querySelector('#chat-input');
   const sendBtn = form.querySelector('#chat-send-btn');
-
-  function setFocusMode(active) {
-    panel.classList.toggle('chat-focus-mode', active);
-    focusOverlay.hidden = !active;
-  }
 
   function escapeHtml(text) {
     return text
@@ -1123,7 +1108,6 @@
 
   function addMessage(text, sender) {
     messagesEl.classList.add('has-messages');
-    setFocusMode(true);
     const msg = document.createElement('div');
     msg.className = 'chat-msg ' + sender;
     if (sender === 'user') {
@@ -1165,7 +1149,6 @@
     input.placeholder = 'Ask Sofia anything\u2026';
     sendBtn.disabled = false;
     clearQuickReplies();
-    setFocusMode(false);
     showOpeningGreeting();
     showDefaultQuickReplies();
     ensureInputVisible();
@@ -1264,8 +1247,6 @@
       exitBookingFlow();
     }
   }
-
-  input.addEventListener('focus', () => setFocusMode(true));
 
   launcher.addEventListener('click', toggleChat);
   closeBtn.addEventListener('click', toggleChat);
