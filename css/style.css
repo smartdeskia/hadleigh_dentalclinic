@@ -1695,19 +1695,35 @@ body.chat-open .chat-panel {
   margin-left: auto;
 }
 .chat-refresh-label {
-  display: none;
+  display: inline;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
 }
 .chat-refresh-btn,
 .chat-close-btn {
-  background: none;
-  border: none;
-  color: rgba(244,246,245,0.75);
   cursor: pointer;
-  padding: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+}
+.chat-refresh-btn {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: var(--radius-pill);
+  padding: 6px 10px;
+  gap: 5px;
+  color: var(--white);
+}
+.chat-close-btn {
+  background: none;
+  border: none;
+  color: rgba(244,246,245,0.75);
+  padding: 4px;
 }
 .chat-refresh-btn:hover,
 .chat-close-btn:hover { color: var(--white); }
@@ -1740,6 +1756,7 @@ body.chat-open .chat-panel {
   display: flex;
   flex-direction: column;
   background: var(--bg);
+  -webkit-overflow-scrolling: touch;
 }
 .chat-menu-intro {
   margin: 0;
@@ -2048,6 +2065,30 @@ body.chat-open .chat-panel {
   border-top: none;
   background: var(--white);
 }
+.chat-start-over-btn {
+  display: none;
+  width: calc(100% - 32px);
+  margin: 8px 16px 0;
+  padding: 10px 14px;
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--white);
+  border: 1px solid rgba(23, 51, 46, 0.18);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+}
+.chat-start-over-btn:hover,
+.chat-start-over-btn:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+  outline: none;
+}
+.chat-panel.chat-has-conversation .chat-start-over-btn {
+  display: block;
+}
 
 .chat-quick-replies {
   display: none;
@@ -2160,13 +2201,18 @@ body.chat-open .chat-panel {
     gap: 2px;
   }
 
-  .chat-refresh-btn,
+  .chat-refresh-btn {
+    min-height: 40px;
+    padding: 8px 12px;
+    color: var(--white);
+    gap: 6px;
+  }
+
   .chat-close-btn {
     min-width: 40px;
     min-height: 40px;
     padding: 8px;
     color: rgba(244,246,245,0.92);
-    gap: 4px;
   }
 
   .chat-refresh-btn svg,
@@ -2176,12 +2222,18 @@ body.chat-open .chat-panel {
   }
 
   .chat-refresh-label {
-    display: inline;
-    font-family: var(--font-mono);
-    font-size: 0.62rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    line-height: 1;
+    font-size: 0.72rem;
+  }
+
+  .chat-start-over-btn {
+    font-size: 0.88rem;
+    padding: 11px 14px;
+  }
+
+  @media (max-width: 380px) {
+    .chat-header-text .status {
+      display: none;
+    }
   }
 
   body.chat-booking-active .chat-panel {

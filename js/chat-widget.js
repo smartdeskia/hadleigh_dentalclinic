@@ -169,6 +169,16 @@
 
   const chatFooter = document.createElement('div');
   chatFooter.className = 'chat-footer';
+
+  const startOverBtn = document.createElement('button');
+  startOverBtn.type = 'button';
+  startOverBtn.id = 'chat-start-over-btn';
+  startOverBtn.className = 'chat-start-over-btn';
+  startOverBtn.textContent = 'Start over';
+  startOverBtn.setAttribute('aria-label', 'Start over');
+  startOverBtn.hidden = true;
+
+  chatFooter.appendChild(startOverBtn);
   chatFooter.appendChild(quickRepliesEl);
   chatFooter.appendChild(form);
   panel.appendChild(messagesEl);
@@ -181,7 +191,7 @@
     refreshBtn.className = 'chat-refresh-btn';
     refreshBtn.setAttribute('aria-label', 'Start over');
     refreshBtn.title = 'Start over';
-    refreshBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.3-6.36L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.3 6.36L3 16"/><path d="M3 21v-5h5"/></svg><span class="chat-refresh-label">Reset</span>';
+    refreshBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.3-6.36L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.3 6.36L3 16"/><path d="M3 21v-5h5"/></svg><span class="chat-refresh-label">Start over</span>';
     const headerActions = document.createElement('div');
     headerActions.className = 'chat-header-actions';
     headerActions.appendChild(refreshBtn);
@@ -788,7 +798,7 @@
   function promptContactPhone() {
     bookingState.step = 'contactPhone';
     bookingState.contactAttempts = 0;
-    addMessage('What\'s your mobile number? (optional — helps us confirm by text)', 'bot');
+    addMessage('What\'s your mobile number? (optional — tap Skip or type your number)', 'bot');
     input.placeholder = 'e.g. 07xxx xxxxxx';
     showQuickReplies([{ label: 'Skip', value: '__skip__' }], () => {
       promptContactEmail();
@@ -798,7 +808,7 @@
 
   function promptContactEmail() {
     bookingState.step = 'contactEmail';
-    addMessage('What\'s your email address? (optional — helps us confirm by email)', 'bot');
+    addMessage('What\'s your email address? (optional — tap Skip or type your email)', 'bot');
     input.placeholder = 'you@example.com';
     showQuickReplies([{ label: 'Skip', value: '__skip__' }], () => {
       promptBookingConfirm();
@@ -1005,8 +1015,15 @@
     return false;
   }
 
+  function updateConversationChrome() {
+    const active = messagesEl.classList.contains('has-messages');
+    panel.classList.toggle('chat-has-conversation', active);
+    startOverBtn.hidden = !active;
+  }
+
   function addMessage(text, sender) {
     messagesEl.classList.add('has-messages');
+    updateConversationChrome();
     const msg = document.createElement('div');
     msg.className = 'chat-msg ' + sender;
     if (sender === 'user') {
@@ -1048,6 +1065,7 @@
     input.placeholder = 'Ask Sofia anything\u2026';
     sendBtn.disabled = false;
     clearQuickReplies();
+    updateConversationChrome();
     showOpeningGreeting();
     showDefaultQuickReplies();
     ensureInputVisible();
@@ -1139,5 +1157,6 @@
 
   launcher.addEventListener('click', toggleChat);
   closeBtn.addEventListener('click', toggleChat);
-  refreshBtn.addEventListener('click', resetChat);
+  if (refreshBtn) refreshBtn.addEventListener('click', resetChat);
+  startOverBtn.addEventListener('click', resetChat);
 })();
