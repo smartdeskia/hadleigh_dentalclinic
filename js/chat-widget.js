@@ -636,10 +636,34 @@
   function clearQuickReplies() {
     quickRepliesEl.innerHTML = '';
     quickRepliesEl.classList.remove('is-visible');
+    messagesEl.querySelectorAll('.chat-transcript-replies').forEach((el) => el.remove());
+  }
+
+  function showTranscriptQuickReplies(options, onSelect) {
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-transcript-replies chat-quick-replies is-visible';
+    options.forEach((option) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chat-quick-btn';
+      btn.textContent = option.label;
+      btn.addEventListener('click', () => {
+        clearQuickReplies();
+        addMessage(option.label, 'user');
+        onSelect(option.value);
+      });
+      wrap.appendChild(btn);
+    });
+    messagesEl.appendChild(wrap);
+    scrollTranscriptToLatest();
   }
 
   function showQuickReplies(options, onSelect) {
     clearQuickReplies();
+    if (bookingState) {
+      showTranscriptQuickReplies(options, onSelect);
+      return;
+    }
     options.forEach((option) => {
       const btn = document.createElement('button');
       btn.type = 'button';
