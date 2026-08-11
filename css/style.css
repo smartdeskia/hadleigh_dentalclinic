@@ -2130,16 +2130,71 @@ body.chat-open .chat-panel {
     bottom: 88px;
     height: min(75vh, calc(100dvh - 112px));
     max-height: min(75vh, calc(100dvh - 112px));
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "chat-header"
+      "chat-menu"
+      "chat-transcript"
+      "chat-footer";
+  }
+
+  .chat-panel:not(:has(.chat-transcript.has-messages)) {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "chat-header"
+      "chat-menu"
+      "chat-footer";
   }
 
   .chat-header {
-    position: sticky;
-    top: 0;
+    grid-area: chat-header;
+    position: relative;
+    top: auto;
     z-index: 3;
     flex-shrink: 0;
     padding: 10px 12px;
     gap: 8px;
     overflow: visible;
+  }
+
+  .chat-body {
+    grid-area: chat-menu;
+    flex: none;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .chat-transcript {
+    grid-area: chat-transcript;
+    flex: none;
+    min-height: 0;
+    max-height: min(200px, 35dvh);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    border-top: 1px solid var(--line);
+  }
+
+  .chat-footer {
+    grid-area: chat-footer;
+    margin-top: 0;
+  }
+
+  .chat-panel:has(.chat-transcript.has-messages) .chat-body,
+  .chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
+    flex: none;
+    max-height: none;
+  }
+
+  .chat-panel:has(.chat-transcript.has-messages) .chat-body {
+    max-height: none;
+  }
+
+  .chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
+    max-height: min(200px, 35dvh);
   }
 
   .chat-header-text .name {
@@ -2180,31 +2235,6 @@ body.chat-open .chat-panel {
     font-weight: 600;
     letter-spacing: 0.02em;
     line-height: 1;
-  }
-
-  .chat-body {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .chat-panel:has(.chat-transcript.has-messages) .chat-body {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-  }
-
-  .chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
-    flex: 0 0 auto;
-    max-height: min(180px, 32vh);
-    min-height: 52px;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    border-top: 1px solid var(--line);
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-menu-intro {
@@ -2252,6 +2282,11 @@ body.chat-open .chat-panel {
   body.chat-booking-active .chat-panel {
     height: min(90vh, calc(100dvh - 112px));
     max-height: min(90vh, calc(100dvh - 112px));
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "chat-header"
+      "chat-transcript"
+      "chat-footer";
   }
 
   body.chat-booking-active .chat-menu-intro,
@@ -2260,13 +2295,10 @@ body.chat-open .chat-panel {
   }
 
   body.chat-booking-active .chat-body {
-    flex: 0 0 auto;
-    min-height: 0;
-    overflow: hidden;
+    display: none;
   }
 
   body.chat-booking-active .chat-transcript.has-messages {
-    flex: 1 1 auto;
     max-height: none;
     min-height: 0;
     overflow-y: auto;
