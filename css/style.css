@@ -2135,19 +2135,42 @@ body.chat-open .chat-panel {
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-body {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
+    max-height: 42%;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
-    flex: 0 0 auto;
-    max-height: min(200px, 32vh);
-    min-height: 52px;
+    flex: 1 1 auto;
+    max-height: none;
+    min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
     border-top: 1px solid var(--line);
+  }
+
+  .chat-panel.chat-user-replied .chat-menu-intro,
+  .chat-panel.chat-user-replied .chat-menu-list {
+    display: none;
+  }
+
+  .chat-panel.chat-user-replied .chat-body {
+    flex: 0 0 auto;
+    max-height: 0;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0;
+    border: 0;
+  }
+
+  .chat-panel.chat-user-replied .chat-transcript {
+    flex: 1 1 auto;
+    max-height: none;
+    border-top: none;
   }
 
   .chat-quick-replies.is-visible {
