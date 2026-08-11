@@ -715,6 +715,7 @@
       ],
       (value) => {
         bookingState.data.contactType = value;
+        bookingState.contactAttempts = 0;
         promptContactValue();
       }
     );
@@ -722,10 +723,36 @@
 
   function promptContactValue() {
     bookingState.step = 'contactValue';
+    if (bookingState.contactAttempts == null) {
+      bookingState.contactAttempts = 0;
+    }
     const channel = bookingState.data.contactType === 'phone' ? 'mobile number' : 'email address';
     addMessage(`What's your ${channel}?`, 'bot');
     input.placeholder = bookingState.data.contactType === 'phone' ? 'e.g. 07xxx xxxxxx' : 'you@example.com';
     input.focus();
+  }
+
+  function showContactRecoveryOptions() {
+    bookingState.step = 'contactRecovery';
+    addMessage(
+      'I\'m having trouble with that number. We can confirm by email instead if that\'s easier — or you can start the booking again.',
+      'bot'
+    );
+    showQuickReplies(
+      [
+        { label: 'Use email instead', value: 'email' },
+        { label: 'Start fresh', value: 'restart' },
+      ],
+      (value) => {
+        if (value === 'restart') {
+          startBookingFlow(true);
+          return;
+        }
+        bookingState.data.contactType = 'email';
+        bookingState.contactAttempts = 0;
+        promptContactValue();
+      }
+    );
   }
 
   function promptBookingConfirm() {
@@ -788,7 +815,7 @@
     }
     setBookingActive(true);
     clearQuickReplies();
-    bookingState = { step: null, data: {} };
+    bookingState = { step: null, data: {}, contactAttempts: 0 };
 
     if (options.treatment) {
       bookingState.data.treatment = options.treatment;
@@ -829,7 +856,12 @@
     if (bookingState.step === 'contactValue') {
       const { contactType } = bookingState.data;
       if (contactType === 'phone' && !isValidPhone(trimmed)) {
-        addMessage('Please enter a valid UK mobile number (at least 10 digits).', 'bot');
+        bookingState.contactAttempts = (bookingState.contactAttempts || 0) + 1;
+        if (bookingState.contactAttempts >= 2) {
+          showContactRecoveryOptions();
+        } else {
+          addMessage('Please enter a valid UK mobile number (at least 10 digits).', 'bot');
+        }
         sendBtn.disabled = false;
         return true;
       }
@@ -839,12 +871,13 @@
         return true;
       }
       bookingState.data.contactValue = trimmed;
+      bookingState.contactAttempts = 0;
       promptBookingConfirm();
       sendBtn.disabled = false;
       return true;
     }
 
-    if (['patientType', 'treatment', 'requestedSlot', 'contactType', 'confirm'].includes(bookingState.step)) {
+    if (['patientType', 'treatment', 'requestedSlot', 'contactType', 'contactRecovery', 'confirm'].includes(bookingState.step)) {
       addMessage('Please pick one of the options above.', 'bot');
       sendBtn.disabled = false;
       return true;
