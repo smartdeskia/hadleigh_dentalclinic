@@ -246,6 +246,38 @@
     return text.trim().toLowerCase().replace(/[?!.,;:]+$/g, '').trim();
   }
 
+  function mentionsBookingIntent(text) {
+    const t = normalizeForMatch(text);
+    if (t.includes('reschedule') || t.includes('cancel')) return false;
+    return (
+      t.includes('book') ||
+      t.includes('appoint') ||
+      t.includes('consult') ||
+      (t.includes('schedule') && !t.includes('reschedule'))
+    );
+  }
+
+  function shouldStartBookingFlow(text) {
+    if (!mentionsBookingIntent(text)) return false;
+    const t = normalizeForMatch(text);
+    if (mentionsCleaning(text) || t.includes('implant') || mentionsInvisalign(text) || t.includes('whiten') || t.includes('bleach')) {
+      return false;
+    }
+    return true;
+  }
+
+  function resumeBookingFlow(options = {}) {
+    if (bookingState.data.patientType) {
+      advanceAfterPatientType();
+      return;
+    }
+    if (visitorName) {
+      promptPatientType({ skipMessage: options.alreadyAtPatientType });
+      return;
+    }
+    promptBookingName();
+  }
+
   function mentionsInvisalign(text) {
     const t = normalizeForMatch(text);
     // inv\w*lign covers invisalign, invaslign, and trailing punctuation after normalize.
@@ -364,7 +396,7 @@
       );
     }
     if (
-      (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
+      mentionsBookingIntent(userText)
       && mentionsCleaning(userText)
     ) {
       return finalizeReply(
@@ -374,7 +406,7 @@
       );
     }
     if (
-      (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
+      mentionsBookingIntent(userText)
       && (t.includes('implant'))
     ) {
       return finalizeReply(
@@ -384,7 +416,7 @@
       );
     }
     if (
-      (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
+      mentionsBookingIntent(userText)
       && mentionsInvisalign(userText)
     ) {
       return finalizeReply(
@@ -394,7 +426,7 @@
       );
     }
     if (
-      (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
+      mentionsBookingIntent(userText)
       && (t.includes('whiten') || t.includes('bleach'))
     ) {
       return finalizeReply(
@@ -403,7 +435,7 @@
         )
       );
     }
-    if (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule'))) {
+    if (mentionsBookingIntent(userText)) {
       return finalizeReply(getGeneralBookingReply());
     }
     if (t.includes('hour') || t.includes('open') || t.includes('close') || t.includes('when are you')) {
@@ -555,6 +587,14 @@
     clearQuickReplies();
     addMessage(item.title, 'user');
 
+    if (bookingState) {
+      if (item.bookingTreatment) {
+        bookingState.data.treatment = item.bookingTreatment;
+      }
+      resumeBookingFlow({ alreadyAtPatientType: bookingState.step === 'patientType' });
+      return;
+    }
+
     const topicLabel = item.topicLabel || 'this';
     replyWithDelay(
       maybePersonalize(`Would you like to read more about ${topicLabel}, or book an appointment?`),
@@ -666,9 +706,11 @@
     input.placeholder = 'Your name\u2026';
   }
 
-  function promptPatientType() {
+  function promptPatientType(options = {}) {
     bookingState.step = 'patientType';
-    addMessage('Are you a new or existing patient?', 'bot');
+    if (!options.skipMessage) {
+      addMessage('Are you a new or existing patient?', 'bot');
+    }
     showQuickReplies(
       [
         { label: 'New patient', value: 'New patient' },
@@ -757,12 +799,14 @@
 
   function promptBookingConfirm() {
     bookingState.step = 'confirm';
+    const name = visitorName || bookingState.data.name || 'Guest';
     const { patientType, treatment, requestedSlot, contactType, contactValue } = bookingState.data;
     const channelLabel = contactType === 'phone' ? 'Text' : 'Email';
     addMessage(
       'Please check your details:' +
       '<ul>' +
-      `<li><strong>Patient:</strong> ${escapeHtml(patientType)}</li>` +
+      `<li><strong>Name:</strong> ${escapeHtml(name)}</li>` +
+      `<li><strong>Patient type:</strong> ${escapeHtml(patientType)}</li>` +
       `<li><strong>Treatment:</strong> ${escapeHtml(treatment)}</li>` +
       `<li><strong>Preferred time:</strong> ${escapeHtml(requestedSlot)}</li>` +
       `<li><strong>${channelLabel}:</strong> ${escapeHtml(contactValue)}</li>` +
@@ -810,6 +854,8 @@
   }
 
   function startBookingFlow(restart, options = {}) {
+    const previousData = !restart && bookingState ? { ...bookingState.data } : {};
+
     if (!restart) {
       greetingState = 'ready';
     }
@@ -819,19 +865,21 @@
 
     if (options.treatment) {
       bookingState.data.treatment = options.treatment;
+    } else if (previousData.treatment) {
+      bookingState.data.treatment = previousData.treatment;
+    }
+
+    if (!restart && previousData.patientType) {
+      bookingState.data.patientType = previousData.patientType;
     }
 
     if (restart) {
       addMessage('No problem — let\'s start again.', 'bot');
-    } else if (!options.fromTopicChoice) {
+    } else if (!options.fromTopicChoice && !options.fromTypedIntent) {
       addMessage('Happy to help you request an appointment.', 'bot');
     }
 
-    if (visitorName) {
-      promptPatientType();
-    } else {
-      promptBookingName();
-    }
+    resumeBookingFlow();
   }
 
   function handleBookingInput(text) {
@@ -991,6 +1039,12 @@
 
       greetingState = 'ready';
       replyWithDelay(getBotReply(text));
+      return;
+    }
+
+    if (greetingState === 'ready' && !bookingState && shouldStartBookingFlow(text)) {
+      startBookingFlow(false, { fromTypedIntent: true });
+      sendBtn.disabled = false;
       return;
     }
 
