@@ -1643,7 +1643,6 @@ body.chat-open .chat-launcher .icon-close { display: block; }
   right: 24px;
   width: 370px;
   max-width: calc(100vw - 32px);
-  height: 540px;
   max-height: calc(100vh - 140px);
   background: var(--white);
   border-radius: var(--radius);
@@ -1805,7 +1804,6 @@ body.chat-open .chat-panel {
 @media (min-width: 768px) {
   .chat-panel {
     width: 440px;
-    height: min(720px, calc(100vh - 96px));
     max-height: calc(100vh - 96px);
     bottom: 88px;
   }
