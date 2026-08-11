@@ -213,9 +213,21 @@
       addQuickReplies(['Tell me more', 'Book now'], (choice) => {
         if (choice === 'Tell me more') {
           addBotMsg(`${item.brief} <a href="${item.anchor}" target="_blank" rel="noopener">See full details</a>`);
+        } else if (item.isNewPatient) {
+          startNewPatientBooking();
         } else {
-          startBookingIntent(item);
+          startBookingIntent(item.service, null);
         }
+      });
+    });
+  }
+
+  function startNewPatientBooking() {
+    replyWithDelay('Which service would you like to book for your first visit?', () => {
+      addQuickReplies(TOPICS.map((t) => t.title), (chosenTitle) => {
+        const chosen = TOPICS.find((t) => t.title === chosenTitle);
+        // Patient type already known — skip asking again
+        startBookingIntent(chosen ? chosen.service : chosenTitle, 'New patient');
       });
     });
   }
@@ -223,17 +235,28 @@
   let bookingIntentData = {};
   let bookingState = null;
 
-  function startBookingIntent(item) {
-    bookingIntentData = { service: item.service };
+  function startBookingIntent(service, presetPatientType) {
+    bookingIntentData = { service: service };
+
+    function askContactMethod() {
+      replyWithDelay('How would you like us to contact you to confirm — text or email?', () => {
+        addQuickReplies(['Text me', 'Email me'], (choice) => {
+          bookingState = choice === 'Text me' ? 'awaiting-phone' : 'awaiting-email';
+          replyWithDelay(choice === 'Text me' ? 'What number should I send it to?' : 'What email address should I send it to?');
+        });
+      });
+    }
+
+    if (presetPatientType) {
+      bookingIntentData.patientType = presetPatientType;
+      askContactMethod();
+      return;
+    }
+
     replyWithDelay('Are you a new or existing patient?', () => {
       addQuickReplies(['New patient', 'Existing patient'], (patientType) => {
         bookingIntentData.patientType = patientType;
-        replyWithDelay('How would you like us to contact you to confirm — text or email?', () => {
-          addQuickReplies(['Text me', 'Email me'], (choice) => {
-            bookingState = choice === 'Text me' ? 'awaiting-phone' : 'awaiting-email';
-            replyWithDelay(choice === 'Text me' ? 'What number should I send it to?' : 'What email address should I send it to?');
-          });
-        });
+        askContactMethod();
       });
     });
   }
