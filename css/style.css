@@ -1727,10 +1727,11 @@ body.chat-open .chat-panel {
 }
 .chat-menu-intro {
   margin: 0;
-  padding: 16px 18px 8px;
-  font-size: 0.88rem;
+  padding: 16px 18px 10px;
+  font-size: 0.9rem;
   line-height: 1.45;
-  color: var(--text-muted);
+  color: var(--text);
+  font-weight: 600;
 }
 .chat-menu-list {
   display: flex;
@@ -1739,39 +1740,66 @@ body.chat-open .chat-panel {
   padding: 0 12px 16px;
 }
 .chat-menu-item {
-  display: block;
-  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 14px 14px 16px;
   border-radius: var(--radius);
   text-decoration: none;
+  text-align: left;
   color: inherit;
   background: var(--white);
   border: 1px solid var(--line);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  cursor: pointer;
+  font: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
 }
 .chat-menu-item:hover,
 .chat-menu-item:focus-visible {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
-  border-color: rgba(23, 51, 46, 0.22);
-  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-warm);
+  outline: 2px solid rgba(47, 125, 108, 0.35);
+  outline-offset: 1px;
+}
+.chat-menu-item-content {
+  flex: 1;
+  min-width: 0;
 }
 .chat-menu-item-title {
   display: block;
   font-family: var(--font-display);
-  font-size: 0.95rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--primary);
   line-height: 1.35;
 }
 .chat-menu-item-desc {
   display: block;
   margin-top: 4px;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   line-height: 1.4;
   color: var(--text-muted);
 }
+.chat-menu-item-chevron {
+  flex-shrink: 0;
+  font-size: 1.5rem;
+  line-height: 1;
+  color: var(--accent);
+  font-weight: 700;
+  transition: transform 0.15s ease;
+}
+.chat-menu-item:hover .chat-menu-item-chevron,
+.chat-menu-item:focus-visible .chat-menu-item-chevron {
+  transform: translateX(2px);
+}
 .chat-menu-item-urgent .chat-menu-item-title {
+  color: #b84a3a;
+}
+.chat-menu-item-urgent .chat-menu-item-chevron {
   color: #b84a3a;
 }
 .chat-transcript {
@@ -1820,7 +1848,7 @@ body.chat-open .chat-panel {
   }
 
   .chat-menu-item-title {
-    font-size: 1rem;
+    font-size: 1.05rem;
   }
 
   .chat-menu-item-desc {
@@ -1828,7 +1856,7 @@ body.chat-open .chat-panel {
   }
 
   .chat-menu-intro {
-    font-size: 0.92rem;
+    font-size: 0.95rem;
   }
 
   .chat-input-row input {

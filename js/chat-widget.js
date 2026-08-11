@@ -23,26 +23,41 @@
       title: "I'm interested in Dental Implants",
       description: 'From £2,000 per tooth. Book a free consultation.',
       href: 'dental-implants.html#cost',
+      topicChoice: true,
+      topicLabel: 'dental implants',
+      bookingTreatment: 'Dental implants',
     },
     {
       title: "I'd like to learn about Invisalign",
       description: 'Platinum Elite provider. Free consultation available.',
       href: 'invisalign.html#five-steps',
+      topicChoice: true,
+      topicLabel: 'Invisalign',
+      bookingTreatment: 'Invisalign',
     },
     {
       title: "I'm interested in Teeth Whitening",
       description: 'From £20/month, interest-free plans available.',
       href: 'teeth-whitening.html#pricing',
+      topicChoice: true,
+      topicLabel: 'teeth whitening',
+      bookingTreatment: 'Teeth whitening',
     },
     {
       title: "I'd like to know about Family Dentistry / NHS pricing",
       description: 'See NHS bands from £23.80.',
       href: 'family-dentistry.html#nhs-pricing',
+      topicChoice: true,
+      topicLabel: 'family dentistry and NHS pricing',
+      bookingTreatment: 'General check-up',
     },
     {
       title: 'I need a hygienist appointment',
       description: 'No referral needed — direct access available.',
       href: 'hygiene-plus.html#what-we-do',
+      topicChoice: true,
+      topicLabel: 'hygiene appointments',
+      bookingTreatment: 'Hygiene / cleaning',
     },
     {
       title: "I have a dental emergency / I'm in pain",
@@ -53,8 +68,9 @@
     {
       title: "I'm a new patient",
       description: 'See what your first visit covers.',
-      href: 'contact.html',
-      booking: true,
+      href: 'new-patients.html',
+      topicChoice: true,
+      topicLabel: 'becoming a new patient',
     },
     {
       title: 'More options',
@@ -108,25 +124,28 @@
   const chatBody = document.createElement('div');
   chatBody.className = 'chat-body';
   chatBody.innerHTML = `
-    <p class="chat-menu-intro">Choose a topic below and we'll take you straight to the right place.</p>
+    <p class="chat-menu-intro">Tap an option below to get started.</p>
     <nav class="chat-menu-list" aria-label="Help topics"></nav>
   `;
   panel.appendChild(chatBody);
 
   const menuList = chatBody.querySelector('.chat-menu-list');
   MENU_ITEMS.forEach((item) => {
-    const link = document.createElement('a');
-    link.className = 'chat-menu-item';
-    if (item.urgent) link.classList.add('chat-menu-item-urgent');
-    link.href = item.href;
-    link.innerHTML = `
-      <span class="chat-menu-item-title">${item.title}</span>
-      <span class="chat-menu-item-desc">${item.description}</span>
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'chat-menu-item';
+    if (item.urgent) btn.classList.add('chat-menu-item-urgent');
+    btn.innerHTML = `
+      <span class="chat-menu-item-content">
+        <span class="chat-menu-item-title">${item.title}</span>
+        <span class="chat-menu-item-desc">${item.description}</span>
+      </span>
+      <span class="chat-menu-item-chevron" aria-hidden="true">›</span>
     `;
-    link.addEventListener('click', () => {
-      document.body.classList.remove('chat-open');
+    btn.addEventListener('click', (event) => {
+      handleMenuItemClick(item, event);
     });
-    menuList.appendChild(link);
+    menuList.appendChild(btn);
   });
 
   const messagesEl = document.createElement('div');
@@ -499,6 +518,49 @@
     messagesEl.lastElementChild?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
+  function advanceAfterPatientType() {
+    if (bookingState.data.treatment) {
+      promptRequestedSlot();
+    } else {
+      promptTreatment();
+    }
+  }
+
+  function handleMenuItemClick(item, event) {
+    event.preventDefault();
+
+    if (!item.topicChoice) {
+      document.body.classList.remove('chat-open');
+      window.location.href = item.href;
+      return;
+    }
+
+    greetingState = 'ready';
+    clearQuickReplies();
+    addMessage(item.title, 'user');
+
+    const topicLabel = item.topicLabel || 'this';
+    addMessage(
+      maybePersonalize(`Would you like to read more about ${topicLabel}, or book an appointment?`),
+      'bot'
+    );
+
+    showQuickReplies(
+      [
+        { label: 'Read more', value: 'read' },
+        { label: 'Book an appointment', value: 'book' },
+      ],
+      (value) => {
+        if (value === 'read') {
+          document.body.classList.remove('chat-open');
+          window.location.href = item.href;
+          return;
+        }
+        startBookingFlow(false, { treatment: item.bookingTreatment || null, fromTopicChoice: true });
+      }
+    );
+  }
+
   function setBookingActive(active) {
     document.body.classList.toggle('chat-booking-active', active);
   }
@@ -594,7 +656,7 @@
       ],
       (value) => {
         bookingState.data.patientType = value;
-        promptTreatment();
+        advanceAfterPatientType();
       }
     );
   }
@@ -700,7 +762,7 @@
     sendBtn.disabled = false;
   }
 
-  function startBookingFlow(restart) {
+  function startBookingFlow(restart, options = {}) {
     if (!restart) {
       greetingState = 'ready';
     }
@@ -708,9 +770,13 @@
     clearQuickReplies();
     bookingState = { step: null, data: {} };
 
+    if (options.treatment) {
+      bookingState.data.treatment = options.treatment;
+    }
+
     if (restart) {
       addMessage('No problem — let\'s start again.', 'bot');
-    } else {
+    } else if (!options.fromTopicChoice) {
       addMessage('Happy to help you request an appointment.', 'bot');
     }
 
