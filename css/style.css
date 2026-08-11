@@ -1929,14 +1929,21 @@ body.chat-open .chat-panel {
 .chat-quick-btn {
   font-family: var(--font-body);
   font-size: 0.78rem;
+  font-weight: 600;
   padding: 7px 13px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(23,51,46,0.16);
+  border: 1px solid var(--accent);
   background: var(--white);
-  color: var(--primary);
+  color: var(--accent);
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
-.chat-quick-btn:hover { background: var(--bg-warm); }
+.chat-quick-btn:hover,
+.chat-quick-btn:focus-visible {
+  background: var(--accent);
+  color: var(--white);
+  outline: none;
+}
 
 .chat-input-row {
   display: flex;
