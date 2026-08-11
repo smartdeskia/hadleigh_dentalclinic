@@ -63,9 +63,43 @@
     },
   ];
 
+  // Make.com webhook — PLACEHOLDER: replace with real URL once the
+  // "Website Chat Booking Request" scenario is built in Make (Supabase + SMS/email).
+  const BOOKING_WEBHOOK_URL = 'https://hook.make.com/PLACEHOLDER_BOOKING_WEBHOOK_ID';
+
+  const notifyBookingRequest = (payload) => {
+    fetch(BOOKING_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    }).catch(() => {
+      // Fire-and-forget: booking intake is best-effort; never affect visitor UX.
+    });
+  };
+
+  const BOOKING_TREATMENTS = [
+    'General check-up',
+    'Hygiene / cleaning',
+    'Invisalign',
+    'Teeth whitening',
+    'Dental implants',
+    'Cosmetic treatment',
+    'Not sure — help me choose',
+  ];
+
+  const BOOKING_SLOTS = [
+    'Mon 9:00 AM',
+    'Tue 2:00 PM',
+    'Wed 10:30 AM',
+    'Thu 4:00 PM',
+    'Fri 11:00 AM',
+    'Flexible — any time',
+  ];
+
   let visitorName = null;
   let greetingState = 'idle';
   let hasShownOpeningGreeting = false;
+  let bookingState = null;
 
   panel.querySelectorAll('#chat-messages, #chat-quick-replies, #chat-input-form, .chat-body, .chat-transcript').forEach((el) => {
     el.remove();
@@ -110,6 +144,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 3 18 9-18 9 4-9-4-9z"/></svg>
     </button>
   `;
+  const quickRepliesEl = document.createElement('div');
+  quickRepliesEl.id = 'chat-quick-replies';
+  quickRepliesEl.className = 'chat-quick-replies';
+  panel.appendChild(quickRepliesEl);
   panel.appendChild(form);
 
   const input = form.querySelector('#chat-input');
@@ -461,6 +499,274 @@
     messagesEl.lastElementChild?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 
+  function setBookingActive(active) {
+    document.body.classList.toggle('chat-booking-active', active);
+  }
+
+  function clearQuickReplies() {
+    quickRepliesEl.innerHTML = '';
+    quickRepliesEl.classList.remove('is-visible');
+  }
+
+  function showQuickReplies(options, onSelect) {
+    clearQuickReplies();
+    options.forEach((option) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chat-quick-btn';
+      btn.textContent = option.label;
+      btn.addEventListener('click', () => {
+        clearQuickReplies();
+        addMessage(option.label, 'user');
+        onSelect(option.value);
+      });
+      quickRepliesEl.appendChild(btn);
+    });
+    quickRepliesEl.classList.add('is-visible');
+    scrollTranscriptToLatest();
+  }
+
+  function isValidEmail(value) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+  }
+
+  function isValidPhone(value) {
+    const digits = value.replace(/\D/g, '');
+    return digits.length >= 10 && digits.length <= 13;
+  }
+
+  function exitBookingFlow() {
+    bookingState = null;
+    setBookingActive(false);
+    clearQuickReplies();
+    input.placeholder = 'Ask Sofia anything\u2026';
+    showDefaultQuickReplies();
+  }
+
+  function showDefaultQuickReplies() {
+    if (bookingState) return;
+    showQuickReplies(
+      [
+        { label: 'Book an appointment', value: '__book__' },
+        { label: 'Opening hours', value: '__hours__' },
+        { label: 'Price list', value: '__price__' },
+      ],
+      (value) => {
+        if (value === '__book__') {
+          startBookingFlow();
+          return;
+        }
+        sendBtn.disabled = true;
+        if (value === '__hours__') {
+          replyWithDelay(
+            finalizeReply(
+              maybePersonalize('We\'re open Mon&ndash;Fri 9:00&ndash;18:00, with occasional Saturdays. Closed Sundays.')
+            )
+          );
+          return;
+        }
+        if (value === '__price__') {
+          replyWithDelay(
+            finalizeReply(
+              maybePersonalize(
+                'Our full price list is on the <a href="about.html#pricing">About page</a> &mdash; everything from check-ups to Invisalign is listed there.'
+              )
+            )
+          );
+        }
+      }
+    );
+  }
+
+  function promptBookingName() {
+    bookingState.step = 'name';
+    addMessage('Great — let\'s get your appointment request started. What\'s your name?', 'bot');
+    input.placeholder = 'Your name\u2026';
+  }
+
+  function promptPatientType() {
+    bookingState.step = 'patientType';
+    addMessage('Are you a new or existing patient?', 'bot');
+    showQuickReplies(
+      [
+        { label: 'New patient', value: 'New patient' },
+        { label: 'Existing patient', value: 'Existing patient' },
+      ],
+      (value) => {
+        bookingState.data.patientType = value;
+        promptTreatment();
+      }
+    );
+  }
+
+  function promptTreatment() {
+    bookingState.step = 'treatment';
+    addMessage('What would you like to book?', 'bot');
+    showQuickReplies(
+      BOOKING_TREATMENTS.map((label) => ({ label, value: label })),
+      (value) => {
+        bookingState.data.treatment = value;
+        promptRequestedSlot();
+      }
+    );
+  }
+
+  function promptRequestedSlot() {
+    bookingState.step = 'requestedSlot';
+    addMessage('When would you prefer to come in?', 'bot');
+    showQuickReplies(
+      BOOKING_SLOTS.map((label) => ({ label, value: label })),
+      (value) => {
+        bookingState.data.requestedSlot = value;
+        promptContactType();
+      }
+    );
+  }
+
+  function promptContactType() {
+    bookingState.step = 'contactType';
+    addMessage('How should our team confirm your appointment?', 'bot');
+    showQuickReplies(
+      [
+        { label: 'Text me', value: 'phone' },
+        { label: 'Email me', value: 'email' },
+      ],
+      (value) => {
+        bookingState.data.contactType = value;
+        promptContactValue();
+      }
+    );
+  }
+
+  function promptContactValue() {
+    bookingState.step = 'contactValue';
+    const channel = bookingState.data.contactType === 'phone' ? 'mobile number' : 'email address';
+    addMessage(`What's your ${channel}?`, 'bot');
+    input.placeholder = bookingState.data.contactType === 'phone' ? 'e.g. 07xxx xxxxxx' : 'you@example.com';
+    input.focus();
+  }
+
+  function promptBookingConfirm() {
+    bookingState.step = 'confirm';
+    const { patientType, treatment, requestedSlot, contactType, contactValue } = bookingState.data;
+    const channelLabel = contactType === 'phone' ? 'Text' : 'Email';
+    addMessage(
+      'Please check your details:' +
+      '<ul>' +
+      `<li><strong>Patient:</strong> ${escapeHtml(patientType)}</li>` +
+      `<li><strong>Treatment:</strong> ${escapeHtml(treatment)}</li>` +
+      `<li><strong>Preferred time:</strong> ${escapeHtml(requestedSlot)}</li>` +
+      `<li><strong>${channelLabel}:</strong> ${escapeHtml(contactValue)}</li>` +
+      '</ul>' +
+      'Tap confirm to send your request — our team will be in touch to confirm.',
+      'bot'
+    );
+    showQuickReplies(
+      [
+        { label: 'Confirm request', value: 'confirm' },
+        { label: 'Start over', value: 'restart' },
+      ],
+      (value) => {
+        if (value === 'restart') {
+          startBookingFlow(true);
+          return;
+        }
+        submitBookingRequest();
+      }
+    );
+    input.placeholder = 'Ask Sofia anything\u2026';
+  }
+
+  function submitBookingRequest() {
+    const name = visitorName || bookingState.data.name || 'Guest';
+    const payload = {
+      name,
+      patientType: bookingState.data.patientType,
+      treatment: bookingState.data.treatment,
+      requestedSlot: bookingState.data.requestedSlot,
+      contactType: bookingState.data.contactType,
+      contactValue: bookingState.data.contactValue,
+    };
+
+    notifyBookingRequest(payload);
+
+    const contactChannel = payload.contactType === 'phone' ? 'by text' : 'by email';
+    addMessage(
+      `Thanks ${escapeHtml(name)} — we\'ve received your request for ${escapeHtml(payload.treatment)} on ${escapeHtml(payload.requestedSlot)}. Our team will confirm shortly, ${contactChannel}.`,
+      'bot'
+    );
+
+    exitBookingFlow();
+    sendBtn.disabled = false;
+  }
+
+  function startBookingFlow(restart) {
+    if (!restart) {
+      greetingState = 'ready';
+    }
+    setBookingActive(true);
+    clearQuickReplies();
+    bookingState = { step: null, data: {} };
+
+    if (restart) {
+      addMessage('No problem — let\'s start again.', 'bot');
+    } else {
+      addMessage('Happy to help you request an appointment.', 'bot');
+    }
+
+    if (visitorName) {
+      promptPatientType();
+    } else {
+      promptBookingName();
+    }
+  }
+
+  function handleBookingInput(text) {
+    if (!bookingState) return false;
+
+    const trimmed = text.trim();
+    if (!trimmed) return true;
+
+    if (bookingState.step === 'name') {
+      const name = extractName(text) || (trimmed.length <= 40 ? formatName(trimmed) : null);
+      if (!name || isBotName(name)) {
+        addMessage('Please enter your name so we know who to confirm with.', 'bot');
+        sendBtn.disabled = false;
+        return true;
+      }
+      visitorName = name;
+      promptPatientType();
+      sendBtn.disabled = false;
+      return true;
+    }
+
+    if (bookingState.step === 'contactValue') {
+      const { contactType } = bookingState.data;
+      if (contactType === 'phone' && !isValidPhone(trimmed)) {
+        addMessage('Please enter a valid UK mobile number (at least 10 digits).', 'bot');
+        sendBtn.disabled = false;
+        return true;
+      }
+      if (contactType === 'email' && !isValidEmail(trimmed)) {
+        addMessage('Please enter a valid email address.', 'bot');
+        sendBtn.disabled = false;
+        return true;
+      }
+      bookingState.data.contactValue = trimmed;
+      promptBookingConfirm();
+      sendBtn.disabled = false;
+      return true;
+    }
+
+    if (['patientType', 'treatment', 'requestedSlot', 'contactType', 'confirm'].includes(bookingState.step)) {
+      addMessage('Please pick one of the options above.', 'bot');
+      sendBtn.disabled = false;
+      return true;
+    }
+
+    return false;
+  }
+
   function addMessage(text, sender) {
     messagesEl.classList.add('has-messages');
     const msg = document.createElement('div');
@@ -502,6 +808,9 @@
       hideTyping();
       addMessage(replyText, 'bot');
       sendBtn.disabled = false;
+      if (!bookingState) {
+        showDefaultQuickReplies();
+      }
     }, 700 + Math.random() * 500);
   }
 
@@ -510,6 +819,10 @@
     addMessage(text, 'user');
     input.value = '';
     sendBtn.disabled = true;
+
+    if (handleBookingInput(text)) {
+      return;
+    }
 
     if (greetingState === 'awaiting_name' || greetingState === 'awaiting_name_retry') {
       const name = extractName(text);
@@ -549,9 +862,13 @@
     const isOpen = document.body.classList.toggle('chat-open');
     if (isOpen) {
       showOpeningGreeting();
+      showDefaultQuickReplies();
+    } else if (bookingState) {
+      exitBookingFlow();
     }
   }
 
   launcher.addEventListener('click', toggleChat);
   closeBtn.addEventListener('click', toggleChat);
+  showDefaultQuickReplies();
 })();

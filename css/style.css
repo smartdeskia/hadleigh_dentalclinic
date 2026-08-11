@@ -1907,12 +1907,15 @@ body.chat-open .chat-panel {
 }
 
 .chat-quick-replies {
-  display: flex;
+  display: none;
   flex-wrap: wrap;
   gap: 8px;
   padding: 0 18px 12px;
   background: var(--bg);
   flex-shrink: 0;
+}
+.chat-quick-replies.is-visible {
+  display: flex;
 }
 .chat-quick-btn {
   font-family: var(--font-body);
@@ -1994,6 +1997,20 @@ body.chat-open .chat-panel {
 
   .chat-input-row {
     flex-shrink: 0;
+  }
+
+  body.chat-booking-active .chat-panel {
+    height: min(90vh, calc(100dvh - 112px));
+    max-height: min(90vh, calc(100dvh - 112px));
+  }
+
+  body.chat-booking-active .chat-body {
+    display: none;
+  }
+
+  body.chat-booking-active .chat-transcript.has-messages {
+    flex: 1 1 auto;
+    max-height: none;
   }
 }
 
