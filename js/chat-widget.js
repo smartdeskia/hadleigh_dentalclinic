@@ -635,8 +635,7 @@
     const hasOption = (pred) => options.some(pred);
 
     if (hasOption((o) => o.value === 'book') && (isAffirmative(text) || t.includes('book') || t.includes('appoint'))) {
-      clearQuickReplies();
-      onSelect('book');
+      commitQuickReplySelection(options.find((o) => o.value === 'book'));
       return true;
     }
 
@@ -644,56 +643,48 @@
       hasOption((o) => o.value === 'read')
       && (t.includes('read') || t.includes('more') || t.includes('info') || t.includes('learn') || t.includes('tell'))
     ) {
-      clearQuickReplies();
-      onSelect('read');
+      commitQuickReplySelection(options.find((o) => o.value === 'read'));
       return true;
     }
 
     if (hasOption((o) => o.value === '__skip__') && isSkipInput(text)) {
-      clearQuickReplies();
-      onSelect('__skip__');
+      commitQuickReplySelection(options.find((o) => o.value === '__skip__'));
       return true;
     }
 
     if (hasOption((o) => o.value === 'New patient') && (t.includes('new') || t === 'new patient')) {
-      clearQuickReplies();
-      onSelect('New patient');
+      commitQuickReplySelection(options.find((o) => o.value === 'New patient'));
       return true;
     }
 
     if (hasOption((o) => o.value === 'Existing patient') && (t.includes('existing') || t === 'existing patient')) {
-      clearQuickReplies();
-      onSelect('Existing patient');
+      commitQuickReplySelection(options.find((o) => o.value === 'Existing patient'));
       return true;
     }
 
     if (hasOption((o) => o.value === 'confirm') && (isAffirmative(text) || t.includes('confirm'))) {
-      clearQuickReplies();
-      onSelect('confirm');
+      commitQuickReplySelection(options.find((o) => o.value === 'confirm'));
       return true;
     }
 
-    if (hasOption((o) => o.value === 'restart') && (t.includes('start over') || t.includes('restart') || t.includes('again'))) {
-      clearQuickReplies();
-      onSelect('restart');
+    if (hasOption((o) => o.value === 'restart') && (t.includes('start over') || t.includes('restart') || t.includes('again') || t.includes('fresh'))) {
+      commitQuickReplySelection(options.find((o) => o.value === 'restart'));
       return true;
     }
 
     if (hasOption((o) => o.value === '__book__') && (isAffirmative(text) || t.includes('book') || t.includes('appoint'))) {
-      clearQuickReplies();
+      selectQuickReplyOption({ label: 'Book an appointment', value: '__book__' });
       promptBookingServiceChoice();
       return true;
     }
 
     if (hasOption((o) => o.value === '__hours__') && (t.includes('hour') || t.includes('open') || t.includes('close'))) {
-      clearQuickReplies();
-      onSelect('__hours__');
+      commitQuickReplySelection(options.find((o) => o.value === '__hours__'));
       return true;
     }
 
     if (hasOption((o) => o.value === '__price__') && (t.includes('price') || t.includes('cost') || t.includes('how much'))) {
-      clearQuickReplies();
-      onSelect('__price__');
+      commitQuickReplySelection(options.find((o) => o.value === '__price__'));
       return true;
     }
 
@@ -701,13 +692,11 @@
       const labelNorm = normalizeForMatch(option.label);
       const valueNorm = normalizeForMatch(String(option.value));
       if (t === labelNorm || t === valueNorm) {
-        clearQuickReplies();
-        onSelect(option.value);
+        commitQuickReplySelection(option);
         return true;
       }
       if (labelNorm.length > 5 && (t.includes(labelNorm) || labelNorm.includes(t))) {
-        clearQuickReplies();
-        onSelect(option.value);
+        commitQuickReplySelection(option);
         return true;
       }
     }
@@ -786,8 +775,48 @@
   function clearQuickReplies() {
     quickRepliesEl.innerHTML = '';
     quickRepliesEl.classList.remove('is-visible');
-    messagesEl.querySelectorAll('.chat-transcript-replies').forEach((el) => el.remove());
     pendingQuickReplies = null;
+  }
+
+  function clearAllQuickReplies() {
+    clearQuickReplies();
+    messagesEl.querySelectorAll('.chat-transcript-replies').forEach((el) => el.remove());
+  }
+
+  function selectQuickReplyOption(option) {
+    pendingQuickReplies = null;
+
+    if (quickRepliesEl.classList.contains('is-visible')) {
+      quickRepliesEl.querySelectorAll('.chat-quick-btn').forEach((btn) => {
+        if (btn.textContent === option.label) {
+          btn.classList.add('is-selected');
+          btn.disabled = true;
+        } else {
+          btn.remove();
+        }
+      });
+      return;
+    }
+
+    const wraps = messagesEl.querySelectorAll('.chat-transcript-replies:not(.is-collapsed)');
+    const wrap = wraps[wraps.length - 1];
+    if (!wrap) return;
+
+    wrap.classList.add('is-collapsed');
+    wrap.querySelectorAll('.chat-quick-btn').forEach((btn) => {
+      if (btn.textContent === option.label) {
+        btn.classList.add('is-selected');
+        btn.disabled = true;
+      } else {
+        btn.remove();
+      }
+    });
+  }
+
+  function commitQuickReplySelection(option) {
+    const handler = pendingQuickReplies?.onSelect;
+    selectQuickReplyOption(option);
+    if (handler) handler(option.value);
   }
 
   function showTranscriptQuickReplies(options, onSelect) {
@@ -800,8 +829,8 @@
       btn.className = 'chat-quick-btn';
       btn.textContent = option.label;
       btn.addEventListener('click', () => {
-        clearQuickReplies();
         addMessage(option.label, 'user');
+        selectQuickReplyOption(option);
         onSelect(option.value);
       });
       wrap.appendChild(btn);
@@ -823,8 +852,8 @@
       btn.className = 'chat-quick-btn';
       btn.textContent = option.label;
       btn.addEventListener('click', () => {
-        clearQuickReplies();
         addMessage(option.label, 'user');
+        selectQuickReplyOption(option);
         onSelect(option.value);
       });
       quickRepliesEl.appendChild(btn);
@@ -846,7 +875,7 @@
   function exitBookingFlow() {
     bookingState = null;
     setBookingActive(false);
-    clearQuickReplies();
+    clearAllQuickReplies();
     input.placeholder = 'Ask Sofia anything\u2026';
     if (greetingState === 'ready') {
       revealMenuOptions();
@@ -1197,7 +1226,7 @@
     input.value = '';
     input.placeholder = 'Ask Sofia anything\u2026';
     sendBtn.disabled = false;
-    clearQuickReplies();
+    clearAllQuickReplies();
     hideMenuOptions();
     showOpeningGreeting();
     ensureInputVisible();

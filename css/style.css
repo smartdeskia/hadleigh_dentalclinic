@@ -2113,6 +2113,13 @@ body.chat-open .chat-panel {
   border-color: var(--accent);
   outline: none;
 }
+.chat-quick-btn.is-selected {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  cursor: default;
+  pointer-events: none;
+}
 
 .chat-input-row {
   display: flex;
