@@ -166,8 +166,12 @@
   const quickRepliesEl = document.createElement('div');
   quickRepliesEl.id = 'chat-quick-replies';
   quickRepliesEl.className = 'chat-quick-replies';
-  panel.appendChild(quickRepliesEl);
-  panel.appendChild(form);
+
+  const chatFooter = document.createElement('div');
+  chatFooter.className = 'chat-footer';
+  chatFooter.appendChild(quickRepliesEl);
+  chatFooter.appendChild(form);
+  panel.appendChild(chatFooter);
 
   const input = form.querySelector('#chat-input');
   const sendBtn = form.querySelector('#chat-send-btn');
@@ -870,11 +874,11 @@
     if (hasShownOpeningGreeting) return;
     hasShownOpeningGreeting = true;
     greetingState = 'awaiting_name';
-    replyWithDelay('Hi! I\'m Sofia 👋 What\'s your name?', { skipQuickReplies: true });
+    replyWithDelay('Hi! I\'m Sofia 👋 What\'s your name?', { skipQuickReplies: true, focusInput: true });
   }
 
   function replyWithDelay(replyText, options = {}) {
-    const { skipQuickReplies = false, onComplete = null } = options;
+    const { skipQuickReplies = false, onComplete = null, focusInput = false } = options;
     showTyping();
     setTimeout(() => {
       hideTyping();
@@ -884,6 +888,7 @@
         showDefaultQuickReplies();
       }
       if (onComplete) onComplete();
+      if (focusInput) input.focus();
     }, 700 + Math.random() * 500);
   }
 
@@ -943,5 +948,4 @@
 
   launcher.addEventListener('click', toggleChat);
   closeBtn.addEventListener('click', toggleChat);
-  showDefaultQuickReplies();
 })();
