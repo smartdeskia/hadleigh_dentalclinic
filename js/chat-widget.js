@@ -77,13 +77,14 @@
 
   const chatBody = document.createElement('div');
   chatBody.className = 'chat-body';
+  // FIX: menu stays hidden until the name step is done — it should not be
+  // visible from the moment the widget opens. Revealed by revealMenu() below.
+  chatBody.style.display = 'none';
   chatBody.innerHTML = `
     <p class="chat-menu-intro">Choose a topic below and we'll take you straight to the right place.</p>
     <nav class="chat-menu-list" aria-label="Help topics"></nav>
   `;
 
-  // PATCH 1: messagesEl created + appended BEFORE chatBody, so the greeting
-  // (which renders into messagesEl) appears above the menu, not below it.
   const messagesEl = document.createElement('div');
   messagesEl.id = 'chat-messages';
   messagesEl.className = 'chat-transcript';
@@ -104,7 +105,6 @@
       <span class="chat-menu-item-chevron" aria-hidden="true">&#8250;</span>
     `;
     if (item.treatmentName) {
-      // PATCH 3: treatment-specific items offer "read more or book?" instead of navigating immediately
       link.addEventListener('click', (e) => {
         e.preventDefault();
         addMessage(item.title, 'user');
@@ -117,6 +117,10 @@
     }
     menuList.appendChild(link);
   });
+
+  function revealMenu() {
+    chatBody.style.display = '';
+  }
 
   const form = document.createElement('form');
   form.id = 'chat-input-form';
@@ -517,8 +521,6 @@
     }, 700 + Math.random() * 500);
   }
 
-  /* ---- PATCH 4: quick replies + booking flow ---- */
-
   function addQuickReplies(options, handler) {
     const wrap = document.createElement('div');
     wrap.className = 'chat-quick-replies';
@@ -635,11 +637,10 @@
     input.value = '';
     sendBtn.disabled = true;
 
-    /* PATCH 5: route booking-flow text replies before the greeting/general logic */
     if (bookingState === 'awaiting-booking-name') {
       const name = extractName(text) || text.trim();
       visitorName = formatName(name);
-      greetingState = 'ready'; // in case the initial name prompt was skipped in favour of booking
+      greetingState = 'ready';
       askBookingContactPreference();
       return;
     }
@@ -657,12 +658,14 @@
       if (name) {
         visitorName = name;
         greetingState = 'ready';
+        revealMenu(); // FIX: menu only appears now, once the name step is actually done
         replyWithDelay(`Nice to meet you, ${escapeHtml(name)}! How can I help you today?`);
         return;
       }
 
       if (looksLikeQuestion(text)) {
         greetingState = 'ready';
+        revealMenu(); // FIX: also reveal here — visitor skipped straight to a question
         replyWithDelay(getBotReply(text));
         return;
       }
@@ -674,6 +677,7 @@
       }
 
       greetingState = 'ready';
+      revealMenu(); // FIX: reveal on the retry-exhausted fallback path too
       replyWithDelay(getBotReply(text));
       return;
     }
