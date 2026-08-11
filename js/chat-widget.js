@@ -515,7 +515,7 @@
 
   function scrollTranscriptToLatest() {
     messagesEl.scrollTop = messagesEl.scrollHeight;
-    messagesEl.lastElementChild?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    messagesEl.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
   }
 
   function advanceAfterPatientType() {
@@ -540,23 +540,26 @@
     addMessage(item.title, 'user');
 
     const topicLabel = item.topicLabel || 'this';
-    addMessage(
+    replyWithDelay(
       maybePersonalize(`Would you like to read more about ${topicLabel}, or book an appointment?`),
-      'bot'
-    );
-
-    showQuickReplies(
-      [
-        { label: 'Tell me more', value: 'read' },
-        { label: 'Book an appointment', value: 'book' },
-      ],
-      (value) => {
-        if (value === 'read') {
-          document.body.classList.remove('chat-open');
-          window.location.href = item.href;
-          return;
-        }
-        startBookingFlow(false, { treatment: item.bookingTreatment || null, fromTopicChoice: true });
+      {
+        skipQuickReplies: true,
+        onComplete: () => {
+          showQuickReplies(
+            [
+              { label: 'Tell me more', value: 'read' },
+              { label: 'Book an appointment', value: 'book' },
+            ],
+            (value) => {
+              if (value === 'read') {
+                document.body.classList.remove('chat-open');
+                window.location.href = item.href;
+                return;
+              }
+              startBookingFlow(false, { treatment: item.bookingTreatment || null, fromTopicChoice: true });
+            }
+          );
+        },
       }
     );
   }
@@ -847,36 +850,40 @@
   }
 
   function showTyping() {
+    hideTyping();
     const typing = document.createElement('div');
     typing.className = 'chat-typing';
     typing.id = 'chat-typing-indicator';
     typing.innerHTML = '<span></span><span></span><span></span>';
+    messagesEl.classList.add('has-messages', 'is-typing');
     messagesEl.appendChild(typing);
-    messagesEl.classList.add('has-messages');
     scrollTranscriptToLatest();
   }
 
   function hideTyping() {
     const typing = document.getElementById('chat-typing-indicator');
     if (typing) typing.remove();
+    messagesEl.classList.remove('is-typing');
   }
 
   function showOpeningGreeting() {
     if (hasShownOpeningGreeting) return;
     hasShownOpeningGreeting = true;
     greetingState = 'awaiting_name';
-    addMessage('Hi! I\'m Sofia 👋 What\'s your name?', 'bot');
+    replyWithDelay('Hi! I\'m Sofia 👋 What\'s your name?', { skipQuickReplies: true });
   }
 
-  function replyWithDelay(replyText) {
+  function replyWithDelay(replyText, options = {}) {
+    const { skipQuickReplies = false, onComplete = null } = options;
     showTyping();
     setTimeout(() => {
       hideTyping();
       addMessage(replyText, 'bot');
       sendBtn.disabled = false;
-      if (!bookingState) {
+      if (!skipQuickReplies && !bookingState) {
         showDefaultQuickReplies();
       }
+      if (onComplete) onComplete();
     }, 700 + Math.random() * 500);
   }
 
