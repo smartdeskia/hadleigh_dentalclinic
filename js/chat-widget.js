@@ -731,6 +731,11 @@
       return;
     }
 
+    if (!panel.classList.contains('chat-menu-ready')) {
+      replyWithDelay('Let me know your name first — then I can help you with that.');
+      return;
+    }
+
     greetingState = 'ready';
     clearQuickReplies();
     addMessage(item.title, 'user');
@@ -749,7 +754,7 @@
       {
         skipQuickReplies: true,
         onComplete: () => {
-          showQuickReplies(
+          showTranscriptQuickReplies(
             [
               { label: 'Tell me more', value: 'read' },
               { label: 'Book an appointment', value: 'book' },
@@ -842,25 +847,7 @@
   function showQuickReplies(options, onSelect) {
     clearQuickReplies();
     pendingQuickReplies = { options, onSelect };
-    if (bookingState) {
-      showTranscriptQuickReplies(options, onSelect);
-      return;
-    }
-    options.forEach((option) => {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'chat-quick-btn';
-      btn.textContent = option.label;
-      btn.addEventListener('click', () => {
-        addMessage(option.label, 'user');
-        selectQuickReplyOption(option);
-        onSelect(option.value);
-      });
-      quickRepliesEl.appendChild(btn);
-    });
-    quickRepliesEl.classList.add('is-visible');
-    scrollTranscriptToLatest();
-    ensureInputVisible();
+    showTranscriptQuickReplies(options, onSelect);
   }
 
   function isValidEmail(value) {
@@ -1321,7 +1308,11 @@
   function toggleChat() {
     const isOpen = document.body.classList.toggle('chat-open');
     if (isOpen) {
-      showOpeningGreeting();
+      if (!hasShownOpeningGreeting) {
+        showOpeningGreeting();
+      } else if (greetingState === 'ready' && panel.classList.contains('chat-menu-ready') && !pendingQuickReplies && !bookingState) {
+        showDefaultQuickReplies();
+      }
     } else if (bookingState) {
       exitBookingFlow();
     }
