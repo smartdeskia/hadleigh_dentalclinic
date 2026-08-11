@@ -547,7 +547,7 @@
 
     showQuickReplies(
       [
-        { label: 'Read more', value: 'read' },
+        { label: 'Tell me more', value: 'read' },
         { label: 'Book an appointment', value: 'book' },
       ],
       (value) => {
