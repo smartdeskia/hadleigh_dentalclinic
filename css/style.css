@@ -1698,6 +1698,7 @@ body.chat-open .chat-panel {
   margin-top: 2px;
 }
 .chat-header-text .status .dot { width: 6px; height: 6px; border-radius: 50%; background: #6fd68f; }
+.chat-refresh-btn,
 .chat-close-btn {
   background: none;
   border: none;
@@ -1705,8 +1706,11 @@ body.chat-open .chat-panel {
   cursor: pointer;
   padding: 4px;
   display: flex;
+  flex-shrink: 0;
 }
+.chat-refresh-btn:hover,
 .chat-close-btn:hover { color: var(--white); }
+.chat-refresh-btn svg,
 .chat-close-btn svg { width: 18px; height: 18px; }
 
 .chat-menu {
@@ -1822,8 +1826,9 @@ body.chat-open .chat-panel {
 }
 
 .chat-panel:has(.chat-transcript.has-messages) .chat-body {
-  flex: 0 0 auto;
-  overflow-y: visible;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .chat-panel:has(.chat-transcript.has-messages) .chat-menu-intro {
@@ -1869,8 +1874,9 @@ body.chat-open .chat-panel {
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-body {
-    flex: 0 0 auto;
-    overflow-y: visible;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
@@ -1878,7 +1884,7 @@ body.chat-open .chat-panel {
     max-height: none;
     min-height: 0;
     overflow-y: visible;
-    padding: 6px 16px 2px;
+    padding: 6px 16px 8px;
   }
 
   .chat-panel:has(.chat-transcript.is-typing) .chat-transcript,
@@ -2014,11 +2020,26 @@ body.chat-open .chat-panel {
   30% { transform: translateY(-4px); opacity: 1; }
 }
 
+.chat-footer {
+  flex-shrink: 0;
+  margin-top: auto;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  z-index: 2;
+}
+.chat-footer .chat-quick-replies {
+  padding-bottom: 0;
+}
+.chat-footer .chat-input-row {
+  border-top: none;
+  background: var(--white);
+}
+
 .chat-quick-replies {
   display: none;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 0 16px 8px;
+  padding: 8px 16px 8px;
   background: var(--bg);
   flex: 0 0 auto;
   flex-shrink: 0;
@@ -2112,15 +2133,16 @@ body.chat-open .chat-panel {
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-body {
-    flex: 0 0 auto;
-    overflow-y: visible;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   .chat-transcript.has-messages {
     flex: 0 0 auto;
-    max-height: 22vh;
+    max-height: none;
     min-height: 0;
-    overflow-y: auto;
+    overflow-y: visible;
     -webkit-overflow-scrolling: touch;
   }
 
@@ -2137,8 +2159,15 @@ body.chat-open .chat-panel {
     max-height: min(90vh, calc(100dvh - 112px));
   }
 
-  body.chat-booking-active .chat-body {
+  body.chat-booking-active .chat-menu-intro,
+  body.chat-booking-active .chat-menu-list {
     display: none;
+  }
+
+  body.chat-booking-active .chat-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
   }
 
   body.chat-booking-active .chat-transcript.has-messages {

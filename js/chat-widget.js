@@ -152,7 +152,7 @@
   messagesEl.id = 'chat-messages';
   messagesEl.className = 'chat-transcript';
   messagesEl.setAttribute('aria-live', 'polite');
-  panel.appendChild(messagesEl);
+  chatBody.appendChild(messagesEl);
 
   const form = document.createElement('form');
   form.id = 'chat-input-form';
@@ -166,8 +166,20 @@
   const quickRepliesEl = document.createElement('div');
   quickRepliesEl.id = 'chat-quick-replies';
   quickRepliesEl.className = 'chat-quick-replies';
-  panel.appendChild(quickRepliesEl);
-  panel.appendChild(form);
+
+  const chatFooter = document.createElement('div');
+  chatFooter.className = 'chat-footer';
+  chatFooter.appendChild(quickRepliesEl);
+  chatFooter.appendChild(form);
+  panel.appendChild(chatFooter);
+
+  const refreshBtn = document.createElement('button');
+  refreshBtn.type = 'button';
+  refreshBtn.id = 'chat-refresh-btn';
+  refreshBtn.className = 'chat-refresh-btn';
+  refreshBtn.setAttribute('aria-label', 'Start over');
+  refreshBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15.3-6.36L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.3 6.36L3 16"/><path d="M3 21v-5h5"/></svg>';
+  panel.querySelector('.chat-header').insertBefore(refreshBtn, closeBtn);
 
   const input = form.querySelector('#chat-input');
   const sendBtn = form.querySelector('#chat-send-btn');
@@ -518,6 +530,10 @@
     messagesEl.lastElementChild?.scrollIntoView({ block: 'end', behavior: 'smooth' });
   }
 
+  function ensureInputVisible() {
+    chatFooter.scrollIntoView({ block: 'end', behavior: 'smooth' });
+  }
+
   function advanceAfterPatientType() {
     if (bookingState.data.treatment) {
       promptRequestedSlot();
@@ -589,6 +605,7 @@
     });
     quickRepliesEl.classList.add('is-visible');
     scrollTranscriptToLatest();
+    ensureInputVisible();
   }
 
   function isValidEmail(value) {
@@ -866,6 +883,25 @@
     messagesEl.classList.remove('is-typing');
   }
 
+  function resetChat() {
+    hideTyping();
+    bookingState = null;
+    setBookingActive(false);
+    messagesEl.innerHTML = '';
+    messagesEl.classList.remove('has-messages', 'is-typing');
+    visitorName = null;
+    greetingState = 'idle';
+    hasShownOpeningGreeting = false;
+    input.value = '';
+    input.placeholder = 'Ask Sofia anything\u2026';
+    sendBtn.disabled = false;
+    clearQuickReplies();
+    showOpeningGreeting();
+    showDefaultQuickReplies();
+    ensureInputVisible();
+    input.focus();
+  }
+
   function showOpeningGreeting() {
     if (hasShownOpeningGreeting) return;
     hasShownOpeningGreeting = true;
@@ -874,7 +910,7 @@
   }
 
   function replyWithDelay(replyText, options = {}) {
-    const { skipQuickReplies = false, onComplete = null } = options;
+    const { skipQuickReplies = false, onComplete = null, focusInput = false } = options;
     showTyping();
     setTimeout(() => {
       hideTyping();
@@ -884,6 +920,8 @@
         showDefaultQuickReplies();
       }
       if (onComplete) onComplete();
+      if (focusInput) input.focus();
+      ensureInputVisible();
     }, 700 + Math.random() * 500);
   }
 
@@ -943,5 +981,5 @@
 
   launcher.addEventListener('click', toggleChat);
   closeBtn.addEventListener('click', toggleChat);
-  showDefaultQuickReplies();
+  refreshBtn.addEventListener('click', resetChat);
 })();
