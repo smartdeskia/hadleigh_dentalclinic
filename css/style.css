@@ -1657,6 +1657,35 @@ body.chat-open .chat-launcher .icon-close { display: block; }
   pointer-events: none;
   transition: opacity 0.2s ease, transform 0.2s ease;
 }
+.chat-main {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg);
+}
+.chat-focus-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(23, 51, 46, 0.52);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 3;
+}
+.chat-panel.chat-focus-mode .chat-focus-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+.chat-header {
+  z-index: 4;
+}
+.chat-footer {
+  position: relative;
+  z-index: 4;
+}
 body.chat-open .chat-panel {
   opacity: 1;
   transform: translateY(0) scale(1);
@@ -1672,7 +1701,6 @@ body.chat-open .chat-panel {
   gap: 12px;
   flex-shrink: 0;
   position: relative;
-  z-index: 2;
 }
 .chat-avatar {
   width: 38px; height: 38px;
@@ -2040,7 +2068,6 @@ body.chat-open .chat-panel {
   margin-top: auto;
   background: var(--bg);
   border-top: 1px solid var(--line);
-  z-index: 2;
 }
 .chat-footer .chat-quick-replies {
   padding-bottom: 0;
