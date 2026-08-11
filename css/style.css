@@ -1643,8 +1643,8 @@ body.chat-open .chat-launcher .icon-close { display: block; }
   right: 24px;
   width: 370px;
   max-width: calc(100vw - 32px);
-  height: 540px;
-  max-height: calc(100vh - 140px);
+  height: auto;
+  max-height: min(320px, calc(100vh - 140px));
   background: var(--white);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
@@ -1655,7 +1655,11 @@ body.chat-open .chat-launcher .icon-close { display: block; }
   opacity: 0;
   transform: translateY(16px) scale(0.98);
   pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, max-height 0.3s ease, height 0.3s ease;
+}
+.chat-panel.chat-menu-ready {
+  height: 540px;
+  max-height: calc(100vh - 140px);
 }
 body.chat-open .chat-panel {
   opacity: 1;
@@ -1749,8 +1753,8 @@ body.chat-open .chat-panel {
   display: none !important;
 }
 .chat-panel:not(.chat-menu-ready):has(.chat-transcript.has-messages) .chat-transcript {
-  flex: 1 1 auto;
-  max-height: none;
+  flex: 0 1 auto;
+  max-height: min(180px, 32vh);
   min-height: 0;
   border-top: none;
 }
@@ -1886,18 +1890,27 @@ body.chat-open .chat-panel {
   .chat-panel {
     width: 400px;
     top: auto;
-    height: min(640px, calc(100vh - 100px));
-    max-height: min(640px, calc(100vh - 100px));
     bottom: 88px;
+    max-height: min(380px, calc(100vh - 100px));
   }
 
-  .chat-panel:has(.chat-transcript.has-messages) {
+  .chat-panel.chat-menu-ready {
+    height: min(640px, calc(100vh - 100px));
+    max-height: min(640px, calc(100vh - 100px));
+  }
+
+  .chat-panel.chat-menu-ready:has(.chat-transcript.has-messages) {
     height: min(680px, calc(100vh - 80px));
     max-height: min(680px, calc(100vh - 80px));
   }
 
   .chat-transcript {
     max-height: 160px;
+  }
+
+  .chat-panel:not(.chat-menu-ready):has(.chat-transcript.has-messages) .chat-transcript {
+    flex: 0 1 auto;
+    max-height: min(160px, 28vh);
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-body {
@@ -2147,6 +2160,10 @@ body.chat-open .chat-panel {
     left: 20px;
     width: auto;
     bottom: 88px;
+    max-height: min(38vh, calc(100dvh - 112px));
+  }
+
+  .chat-panel.chat-menu-ready {
     height: min(75vh, calc(100dvh - 112px));
     max-height: min(75vh, calc(100dvh - 112px));
   }

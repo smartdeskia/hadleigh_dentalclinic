@@ -21,6 +21,14 @@
 
   const MENU_ITEMS = [
     {
+      title: 'I need a routine check-up',
+      description: 'Book a general dental examination.',
+      href: 'general-dentistry.html',
+      topicChoice: true,
+      topicLabel: 'routine check-ups',
+      bookingTreatment: 'General check-up',
+    },
+    {
       title: "I'm interested in Dental Implants",
       description: 'From £2,000 per tooth. Book a free consultation.',
       href: 'dental-implants.html#cost',
@@ -284,13 +292,43 @@
     );
   }
 
-  function shouldStartBookingFlow(text) {
-    if (!mentionsBookingIntent(text)) return false;
+  function detectBookingTreatment(text) {
     const t = normalizeForMatch(text);
-    if (mentionsCleaning(text) || t.includes('implant') || mentionsInvisalign(text) || t.includes('whiten') || t.includes('bleach')) {
-      return false;
+    if (mentionsCleaning(text)) return 'Hygiene / cleaning';
+    if (t.includes('implant')) return 'Dental implants';
+    if (mentionsInvisalign(text)) return 'Invisalign';
+    if (t.includes('whiten') || t.includes('bleach')) return 'Teeth whitening';
+    if (t.includes('cosmetic')) return 'Cosmetic treatment';
+    if (t.includes('check') || t.includes('checkup') || t.includes('check-up') || t.includes('routine')) {
+      return 'General check-up';
     }
-    return true;
+    return null;
+  }
+
+  function promptBookingServiceChoice(preselectedTreatment = null) {
+    if (preselectedTreatment) {
+      startBookingFlow(false, { treatment: preselectedTreatment, fromTypedIntent: true });
+      return;
+    }
+
+    revealMenuOptions();
+    replyWithDelay(
+      maybePersonalize(
+        'Which appointment would you like to book? Choose a service below, or pick an option from the menu.'
+      ),
+      {
+        skipQuickReplies: true,
+        onComplete: () => {
+          showTranscriptQuickReplies(
+            BOOKING_TREATMENTS.map((label) => ({ label, value: label })),
+            (value) => {
+              const treatment = value === 'Not sure — help me choose' ? null : value;
+              startBookingFlow(false, { treatment, fromTypedIntent: true });
+            }
+          );
+        },
+      }
+    );
   }
 
   function resumeBookingFlow(options = {}) {
@@ -643,7 +681,7 @@
 
     if (hasOption((o) => o.value === '__book__') && (isAffirmative(text) || t.includes('book') || t.includes('appoint'))) {
       clearQuickReplies();
-      onSelect('__book__');
+      promptBookingServiceChoice();
       return true;
     }
 
@@ -819,15 +857,10 @@
     if (bookingState || !panel.classList.contains('chat-menu-ready')) return;
     showQuickReplies(
       [
-        { label: 'Book an appointment', value: '__book__' },
         { label: 'Opening hours', value: '__hours__' },
         { label: 'Price list', value: '__price__' },
       ],
       (value) => {
-        if (value === '__book__') {
-          startBookingFlow();
-          return;
-        }
         sendBtn.disabled = true;
         if (value === '__hours__') {
           replyWithDelay(
@@ -1242,8 +1275,8 @@
       return;
     }
 
-    if (greetingState === 'ready' && !bookingState && shouldStartBookingFlow(text)) {
-      startBookingFlow(false, { fromTypedIntent: true });
+    if (greetingState === 'ready' && !bookingState && mentionsBookingIntent(text)) {
+      promptBookingServiceChoice(detectBookingTreatment(text));
       sendBtn.disabled = false;
       return;
     }
