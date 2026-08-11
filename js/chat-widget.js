@@ -117,6 +117,7 @@
   let greetingState = 'idle';
   let hasShownOpeningGreeting = false;
   let bookingState = null;
+  let pendingQuickReplies = null;
 
   panel.querySelectorAll('#chat-messages, #chat-quick-replies, #chat-input-form, .chat-body, .chat-transcript').forEach((el) => {
     el.remove();
@@ -584,6 +585,99 @@
     );
   }
 
+  function isAffirmative(text) {
+    const t = normalizeForMatch(text);
+    return /^(yes|yeah|yep|yup|sure|ok|okay|please|definitely|absolutely|correct|affirmative|fine|sounds good|go ahead)( please)?$/.test(t);
+  }
+
+  function tryMatchPendingQuickReply(text) {
+    if (!pendingQuickReplies) return false;
+
+    const t = normalizeForMatch(text);
+    const { options, onSelect } = pendingQuickReplies;
+    const hasOption = (pred) => options.some(pred);
+
+    if (hasOption((o) => o.value === 'book') && (isAffirmative(text) || t.includes('book') || t.includes('appoint'))) {
+      clearQuickReplies();
+      onSelect('book');
+      return true;
+    }
+
+    if (
+      hasOption((o) => o.value === 'read')
+      && (t.includes('read') || t.includes('more') || t.includes('info') || t.includes('learn') || t.includes('tell'))
+    ) {
+      clearQuickReplies();
+      onSelect('read');
+      return true;
+    }
+
+    if (hasOption((o) => o.value === '__skip__') && isSkipInput(text)) {
+      clearQuickReplies();
+      onSelect('__skip__');
+      return true;
+    }
+
+    if (hasOption((o) => o.value === 'New patient') && (t.includes('new') || t === 'new patient')) {
+      clearQuickReplies();
+      onSelect('New patient');
+      return true;
+    }
+
+    if (hasOption((o) => o.value === 'Existing patient') && (t.includes('existing') || t === 'existing patient')) {
+      clearQuickReplies();
+      onSelect('Existing patient');
+      return true;
+    }
+
+    if (hasOption((o) => o.value === 'confirm') && (isAffirmative(text) || t.includes('confirm'))) {
+      clearQuickReplies();
+      onSelect('confirm');
+      return true;
+    }
+
+    if (hasOption((o) => o.value === 'restart') && (t.includes('start over') || t.includes('restart') || t.includes('again'))) {
+      clearQuickReplies();
+      onSelect('restart');
+      return true;
+    }
+
+    if (hasOption((o) => o.value === '__book__') && (isAffirmative(text) || t.includes('book') || t.includes('appoint'))) {
+      clearQuickReplies();
+      onSelect('__book__');
+      return true;
+    }
+
+    if (hasOption((o) => o.value === '__hours__') && (t.includes('hour') || t.includes('open') || t.includes('close'))) {
+      clearQuickReplies();
+      onSelect('__hours__');
+      return true;
+    }
+
+    if (hasOption((o) => o.value === '__price__') && (t.includes('price') || t.includes('cost') || t.includes('how much'))) {
+      clearQuickReplies();
+      onSelect('__price__');
+      return true;
+    }
+
+    for (const option of options) {
+      const labelNorm = normalizeForMatch(option.label);
+      const valueNorm = normalizeForMatch(String(option.value));
+      if (t === labelNorm || t === valueNorm) {
+        clearQuickReplies();
+        onSelect(option.value);
+        return true;
+      }
+      if (labelNorm.length > 5 && (t.includes(labelNorm) || labelNorm.includes(t))) {
+        clearQuickReplies();
+        onSelect(option.value);
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   function scrollTranscriptToLatest() {
     requestAnimationFrame(() => {
       messagesEl.scrollTop = messagesEl.scrollHeight;
@@ -656,9 +750,11 @@
     quickRepliesEl.innerHTML = '';
     quickRepliesEl.classList.remove('is-visible');
     messagesEl.querySelectorAll('.chat-transcript-replies').forEach((el) => el.remove());
+    pendingQuickReplies = null;
   }
 
   function showTranscriptQuickReplies(options, onSelect) {
+    pendingQuickReplies = { options, onSelect };
     const wrap = document.createElement('div');
     wrap.className = 'chat-transcript-replies chat-quick-replies is-visible';
     options.forEach((option) => {
@@ -679,6 +775,7 @@
 
   function showQuickReplies(options, onSelect) {
     clearQuickReplies();
+    pendingQuickReplies = { options, onSelect };
     if (bookingState) {
       showTranscriptQuickReplies(options, onSelect);
       return;
@@ -1105,6 +1202,16 @@
     sendBtn.disabled = true;
 
     if (handleBookingInput(text)) {
+      return;
+    }
+
+    if (tryMatchPendingQuickReply(text)) {
+      sendBtn.disabled = false;
+      return;
+    }
+
+    if (pendingQuickReplies) {
+      replyWithDelay('Please tap one of the options above — or type "book an appointment" or "tell me more".');
       return;
     }
 
