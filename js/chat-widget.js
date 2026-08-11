@@ -194,7 +194,13 @@
   /* ======================================================================
      DOM HELPERS
      ====================================================================== */
-  function scrollDown() { body.scrollTop = body.scrollHeight; }
+  function scrollDown() {
+    requestAnimationFrame(() => {
+      body.scrollTop = body.scrollHeight;
+      const last = body.lastElementChild;
+      if (last) last.scrollIntoView({ block: 'end', behavior: 'smooth' });
+    });
+  }
 
   function addBotMsg(html) {
     const div = document.createElement('div');
