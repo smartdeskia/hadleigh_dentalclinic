@@ -2135,8 +2135,7 @@ body.chat-open .chat-panel {
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-body {
-    flex: 0 1 auto;
-    max-height: 42%;
+    flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -2144,33 +2143,47 @@ body.chat-open .chat-panel {
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
-    flex: 1 1 auto;
-    max-height: none;
-    min-height: 0;
+    flex: 0 0 auto;
+    max-height: min(180px, 32vh);
+    min-height: 52px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
     border-top: 1px solid var(--line);
   }
 
-  .chat-panel.chat-user-replied .chat-menu-intro,
-  .chat-panel.chat-user-replied .chat-menu-list {
-    display: none;
+  .chat-panel:has(.chat-transcript.has-messages) .chat-menu-intro {
+    padding: 6px 16px 3px;
+    font-size: 0.8rem;
   }
 
-  .chat-panel.chat-user-replied .chat-body {
-    flex: 0 0 auto;
-    max-height: 0;
-    min-height: 0;
-    overflow: hidden;
-    padding: 0;
-    border: 0;
+  .chat-panel:has(.chat-transcript.has-messages) .chat-menu-list {
+    gap: 4px;
+    padding: 0 10px 4px;
   }
 
-  .chat-panel.chat-user-replied .chat-transcript {
-    flex: 1 1 auto;
-    max-height: none;
-    border-top: none;
+  .chat-panel:has(.chat-transcript.has-messages) .chat-menu-item {
+    padding: 6px 10px 6px 12px;
+  }
+
+  .chat-panel:has(.chat-transcript.has-messages) .chat-menu-item-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+
+  .chat-panel:has(.chat-transcript.has-messages) .chat-menu-item-desc {
+    font-size: 0.72rem;
+  }
+
+  .chat-msg {
+    font-size: 0.92rem;
+    line-height: 1.45;
+    padding: 10px 14px;
+  }
+
+  .chat-msg.bot {
+    font-size: 0.92rem;
+    font-weight: 600;
   }
 
   .chat-quick-replies.is-visible {

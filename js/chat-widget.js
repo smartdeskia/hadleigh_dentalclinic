@@ -975,9 +975,6 @@
 
   function addMessage(text, sender) {
     messagesEl.classList.add('has-messages');
-    if (sender === 'user') {
-      panel.classList.add('chat-user-replied');
-    }
     const msg = document.createElement('div');
     msg.className = 'chat-msg ' + sender;
     if (sender === 'user') {
@@ -1012,7 +1009,6 @@
     setBookingActive(false);
     messagesEl.innerHTML = '';
     messagesEl.classList.remove('has-messages', 'is-typing');
-    panel.classList.remove('chat-user-replied');
     visitorName = null;
     greetingState = 'idle';
     hasShownOpeningGreeting = false;
