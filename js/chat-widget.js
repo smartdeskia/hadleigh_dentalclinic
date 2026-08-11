@@ -512,12 +512,13 @@
     addMessage('Hi! I\'m Sofia 👋 What\'s your name?', 'bot');
   }
 
-  function replyWithDelay(replyText) {
+  function replyWithDelay(replyText, afterCallback) {
     showTyping();
     setTimeout(() => {
       hideTyping();
       addMessage(replyText, 'bot');
       sendBtn.disabled = false;
+      if (afterCallback) afterCallback();
     }, 700 + Math.random() * 500);
   }
 
@@ -542,8 +543,7 @@
   }
 
   function offerReadMoreOrBook(treatmentName, href) {
-    replyWithDelay(`Sure — would you like to read more about ${escapeHtml(treatmentName)} first, or go ahead and book?`);
-    setTimeout(() => {
+    replyWithDelay(`Sure — would you like to read more about ${escapeHtml(treatmentName)} first, or go ahead and book?`, () => {
       addQuickReplies(['Tell me more', 'Book an appointment'], (choice) => {
         if (choice === 'Tell me more') {
           window.location.href = href;
@@ -551,7 +551,7 @@
           startBooking(treatmentName);
         }
       });
-    }, 900);
+    });
   }
 
   let bookingState = null;
@@ -563,29 +563,26 @@
 
   function startBooking(preselectedTreatment) {
     bookingState = 'patient-type';
-    replyWithDelay("Great — let's get you booked in. Are you a new or existing patient?");
-    setTimeout(() => {
+    replyWithDelay("Great — let's get you booked in. Are you a new or existing patient?", () => {
       addQuickReplies(['New patient', 'Existing patient'], (choice) => {
         bookingData.patientType = choice;
         if (preselectedTreatment) {
           bookingData.treatment = preselectedTreatment;
           showBookingSlots(preselectedTreatment);
         } else {
-          replyWithDelay('What would you like to book?');
-          setTimeout(() => {
+          replyWithDelay('What would you like to book?', () => {
             addQuickReplies(BOOKING_TREATMENTS, (treatment) => {
               bookingData.treatment = treatment;
               showBookingSlots(treatment);
             });
-          }, 900);
+          });
         }
       });
-    }, 900);
+    });
   }
 
   function showBookingSlots(treatment) {
-    replyWithDelay(`I have openings for ${escapeHtml(treatment)}:`);
-    setTimeout(() => {
+    replyWithDelay(`I have openings for ${escapeHtml(treatment)}:`, () => {
       addQuickReplies(BOOKING_SLOTS, (slot) => {
         bookingData.slot = slot;
         if (visitorName) {
@@ -595,17 +592,16 @@
           replyWithDelay('What name should I book this under?');
         }
       });
-    }, 900);
+    });
   }
 
   function askBookingContactPreference() {
-    replyWithDelay(`Thanks, ${escapeHtml(visitorName)}! How would you like your confirmation — by text or email?`);
-    setTimeout(() => {
+    replyWithDelay(`Thanks, ${escapeHtml(visitorName)}! How would you like your confirmation — by text or email?`, () => {
       addQuickReplies(['Text me', 'Email me'], (choice) => {
         bookingState = choice === 'Text me' ? 'awaiting-phone' : 'awaiting-email';
         replyWithDelay(choice === 'Text me' ? 'What number should I send it to?' : 'What email address should I send it to?');
       });
-    }, 900);
+    });
   }
 
   function submitBookingRequest(contactValue, contactType) {
