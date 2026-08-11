@@ -1639,7 +1639,7 @@ body.chat-open .chat-launcher .icon-close { display: block; }
 
 .chat-panel {
   position: fixed;
-  bottom: 96px;
+  bottom: 84px;
   right: 24px;
   width: 370px;
   max-width: calc(100vw - 32px);
@@ -1805,7 +1805,7 @@ body.chat-open .chat-panel {
   .chat-panel {
     width: 440px;
     max-height: calc(100vh - 96px);
-    bottom: 88px;
+    bottom: 84px;
   }
 
   .chat-transcript {
@@ -1982,9 +1982,8 @@ body.chat-open .chat-panel {
     right: 20px;
     left: 20px;
     width: auto;
-    bottom: 88px;
-    height: min(75vh, calc(100dvh - 112px));
-    max-height: min(75vh, calc(100dvh - 112px));
+    bottom: 84px;
+    max-height: min(88vh, calc(100dvh - 100px));
   }
 
   .chat-header {
