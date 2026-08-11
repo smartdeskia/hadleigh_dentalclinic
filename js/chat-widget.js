@@ -197,6 +197,20 @@
   const input = form.querySelector('#chat-input');
   const sendBtn = form.querySelector('#chat-send-btn');
 
+  function setMenuReady(ready) {
+    panel.classList.toggle('chat-menu-ready', ready);
+  }
+
+  function revealMenuOptions() {
+    if (panel.classList.contains('chat-menu-ready')) return;
+    setMenuReady(true);
+    showDefaultQuickReplies();
+  }
+
+  function hideMenuOptions() {
+    setMenuReady(false);
+  }
+
   function escapeHtml(text) {
     return text
       .replace(/&/g, '&amp;')
@@ -796,11 +810,13 @@
     setBookingActive(false);
     clearQuickReplies();
     input.placeholder = 'Ask Sofia anything\u2026';
-    showDefaultQuickReplies();
+    if (greetingState === 'ready') {
+      revealMenuOptions();
+    }
   }
 
   function showDefaultQuickReplies() {
-    if (bookingState) return;
+    if (bookingState || !panel.classList.contains('chat-menu-ready')) return;
     showQuickReplies(
       [
         { label: 'Book an appointment', value: '__book__' },
@@ -1149,8 +1165,8 @@
     input.placeholder = 'Ask Sofia anything\u2026';
     sendBtn.disabled = false;
     clearQuickReplies();
+    hideMenuOptions();
     showOpeningGreeting();
-    showDefaultQuickReplies();
     ensureInputVisible();
     input.focus();
   }
@@ -1203,13 +1219,15 @@
       if (name) {
         visitorName = name;
         greetingState = 'ready';
-        replyWithDelay(`Nice to meet you, ${escapeHtml(name)}! How can I help you today?`);
+        replyWithDelay(`Nice to meet you, ${escapeHtml(name)}! How can I help you today?`, {
+          onComplete: () => revealMenuOptions(),
+        });
         return;
       }
 
       if (looksLikeQuestion(text)) {
         greetingState = 'ready';
-        replyWithDelay(getBotReply(text));
+        replyWithDelay(getBotReply(text), { onComplete: () => revealMenuOptions() });
         return;
       }
 
@@ -1220,7 +1238,7 @@
       }
 
       greetingState = 'ready';
-      replyWithDelay(getBotReply(text));
+      replyWithDelay(getBotReply(text), { onComplete: () => revealMenuOptions() });
       return;
     }
 
@@ -1242,7 +1260,6 @@
     const isOpen = document.body.classList.toggle('chat-open');
     if (isOpen) {
       showOpeningGreeting();
-      showDefaultQuickReplies();
     } else if (bookingState) {
       exitBookingFlow();
     }

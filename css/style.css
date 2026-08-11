@@ -1742,6 +1742,18 @@ body.chat-open .chat-panel {
   background: var(--bg);
   -webkit-overflow-scrolling: touch;
 }
+.chat-panel:not(.chat-menu-ready) .chat-body {
+  display: none;
+}
+.chat-panel:not(.chat-menu-ready) .chat-footer .chat-quick-replies {
+  display: none !important;
+}
+.chat-panel:not(.chat-menu-ready):has(.chat-transcript.has-messages) .chat-transcript {
+  flex: 1 1 auto;
+  max-height: none;
+  min-height: 0;
+  border-top: none;
+}
 .chat-menu-intro {
   margin: 0;
   padding: 12px 16px 6px;
