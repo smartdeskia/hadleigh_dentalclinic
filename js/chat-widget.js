@@ -221,7 +221,18 @@
     replyWithDelay('Would you like to know more first, or go ahead and book?', () => {
       addQuickReplies(['Tell me more', 'Book now'], (choice) => {
         if (choice === 'Tell me more') {
-          addBotMsg(`${item.brief} <a href="${item.anchor}" target="_blank" rel="noopener">See full details</a>`);
+          addBotMsg(`${item.brief} <a href="${item.anchor}" id="sofia-details-link" rel="noopener">See full details</a>`);
+          const link = document.getElementById('sofia-details-link');
+          if (link) {
+            link.addEventListener('click', () => {
+              // Real page navigation is about to happen — save state so the widget
+              // reopens picking up where it left off, instead of forgetting everything.
+              try {
+                sessionStorage.setItem('sofia_visitor_name', visitorName || '');
+                sessionStorage.setItem('sofia_should_reopen', '1');
+              } catch (e) { /* sessionStorage unavailable — degrade gracefully, no persistence */ }
+            });
+          }
         } else if (item.isNewPatient) {
           startNewPatientBooking();
         } else {
@@ -400,6 +411,25 @@
     document.body.classList.add('sofia-open');
     if (!hasOpenedBefore) { hasOpenedBefore = true; replyWithDelay("Hi! I'm Sofia 👋 What's your name?"); }
   }
+
+  // Check once, on load, whether we should reopen automatically (visitor just followed
+  // a "See full details" link from the chat). A normal page refresh never sets this flag,
+  // so an ordinary reload still resets the conversation as expected.
+  (function checkReopen() {
+    try {
+      if (sessionStorage.getItem('sofia_should_reopen') === '1') {
+        const savedName = sessionStorage.getItem('sofia_visitor_name');
+        sessionStorage.removeItem('sofia_should_reopen');
+        sessionStorage.removeItem('sofia_visitor_name');
+        if (savedName) {
+          visitorName = savedName;
+          hasOpenedBefore = true;
+          document.body.classList.add('sofia-open');
+          replyWithDelay(`Welcome back, ${savedName}! Pick another option below, or ask me anything.`, showMenu);
+        }
+      }
+    } catch (e) { /* sessionStorage unavailable — just behaves like a normal fresh load */ }
+  })();
   function closePanel() { document.body.classList.remove('sofia-open'); }
   function toggle() { document.body.classList.contains('sofia-open') ? closePanel() : openPanel(); }
 
