@@ -1686,7 +1686,33 @@ body.chat-open .chat-panel {
   font-size: 1rem;
   flex-shrink: 0;
 }
-.chat-header-text { flex: 1; }
+.chat-header-text { flex: 1; min-width: 0; }
+.chat-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.chat-refresh-label {
+  display: none;
+}
+.chat-refresh-btn,
+.chat-close-btn {
+  background: none;
+  border: none;
+  color: rgba(244,246,245,0.75);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.chat-refresh-btn:hover,
+.chat-close-btn:hover { color: var(--white); }
+.chat-refresh-btn svg,
+.chat-close-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
 .chat-header-text .name { font-family: var(--font-display); font-size: 0.95rem; font-weight: 600; line-height: 1.2; }
 .chat-header-text .status {
   font-family: var(--font-mono);
@@ -1698,20 +1724,6 @@ body.chat-open .chat-panel {
   margin-top: 2px;
 }
 .chat-header-text .status .dot { width: 6px; height: 6px; border-radius: 50%; background: #6fd68f; }
-.chat-refresh-btn,
-.chat-close-btn {
-  background: none;
-  border: none;
-  color: rgba(244,246,245,0.75);
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  flex-shrink: 0;
-}
-.chat-refresh-btn:hover,
-.chat-close-btn:hover { color: var(--white); }
-.chat-refresh-btn svg,
-.chat-close-btn svg { width: 18px; height: 18px; }
 
 .chat-menu {
   flex: 1;
@@ -2125,6 +2137,49 @@ body.chat-open .chat-panel {
     top: 0;
     z-index: 3;
     flex-shrink: 0;
+    padding: 10px 12px;
+    gap: 8px;
+    overflow: visible;
+  }
+
+  .chat-header-text .name {
+    font-size: 0.9rem;
+  }
+
+  .chat-header-text .status {
+    font-size: 0.62rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .chat-header-actions {
+    gap: 2px;
+  }
+
+  .chat-refresh-btn,
+  .chat-close-btn {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 8px;
+    color: rgba(244,246,245,0.92);
+    gap: 4px;
+  }
+
+  .chat-refresh-btn svg,
+  .chat-close-btn svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .chat-refresh-label {
+    display: inline;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1;
   }
 
   .chat-body {

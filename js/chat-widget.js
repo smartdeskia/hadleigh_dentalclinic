@@ -178,8 +178,14 @@
   refreshBtn.id = 'chat-refresh-btn';
   refreshBtn.className = 'chat-refresh-btn';
   refreshBtn.setAttribute('aria-label', 'Start over');
-  refreshBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15.3-6.36L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.3 6.36L3 16"/><path d="M3 21v-5h5"/></svg>';
-  panel.querySelector('.chat-header').insertBefore(refreshBtn, closeBtn);
+  refreshBtn.title = 'Start over';
+  refreshBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 0 1 15.3-6.36L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15.3 6.36L3 16"/><path d="M3 21v-5h5"/></svg><span class="chat-refresh-label">Reset</span>';
+
+  const headerActions = document.createElement('div');
+  headerActions.className = 'chat-header-actions';
+  headerActions.appendChild(refreshBtn);
+  headerActions.appendChild(closeBtn);
+  panel.querySelector('.chat-header').appendChild(headerActions);
 
   const input = form.querySelector('#chat-input');
   const sendBtn = form.querySelector('#chat-send-btn');
