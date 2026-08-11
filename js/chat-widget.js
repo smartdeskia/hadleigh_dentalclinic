@@ -743,47 +743,46 @@
       BOOKING_SLOTS.map((label) => ({ label, value: label })),
       (value) => {
         bookingState.data.requestedSlot = value;
-        promptContactType();
+        promptContactPhone();
       }
     );
   }
 
-  function promptContactType() {
-    bookingState.step = 'contactType';
-    addMessage('How should our team confirm your appointment?', 'bot');
-    showQuickReplies(
-      [
-        { label: 'Text me', value: 'phone' },
-        { label: 'Email me', value: 'email' },
-      ],
-      (value) => {
-        bookingState.data.contactType = value;
-        bookingState.contactAttempts = 0;
-        promptContactValue();
-      }
-    );
+  function isSkipInput(text) {
+    const t = normalizeForMatch(text);
+    return t === 'skip' || t === 'no' || t === 'none' || t === 'pass' || t === 'later';
   }
 
-  function promptContactValue() {
-    bookingState.step = 'contactValue';
-    if (bookingState.contactAttempts == null) {
-      bookingState.contactAttempts = 0;
-    }
-    const channel = bookingState.data.contactType === 'phone' ? 'mobile number' : 'email address';
-    addMessage(`What's your ${channel}?`, 'bot');
-    input.placeholder = bookingState.data.contactType === 'phone' ? 'e.g. 07xxx xxxxxx' : 'you@example.com';
+  function promptContactPhone() {
+    bookingState.step = 'contactPhone';
+    bookingState.contactAttempts = 0;
+    addMessage('What\'s your mobile number? (optional — helps us confirm by text)', 'bot');
+    input.placeholder = 'e.g. 07xxx xxxxxx';
+    showQuickReplies([{ label: 'Skip', value: '__skip__' }], () => {
+      promptContactEmail();
+    });
     input.focus();
   }
 
-  function showContactRecoveryOptions() {
-    bookingState.step = 'contactRecovery';
+  function promptContactEmail() {
+    bookingState.step = 'contactEmail';
+    addMessage('What\'s your email address? (optional — helps us confirm by email)', 'bot');
+    input.placeholder = 'you@example.com';
+    showQuickReplies([{ label: 'Skip', value: '__skip__' }], () => {
+      promptBookingConfirm();
+    });
+    input.focus();
+  }
+
+  function showPhoneRecoveryOptions() {
+    bookingState.step = 'contactPhoneRecovery';
     addMessage(
-      'I\'m having trouble with that number. We can confirm by email instead if that\'s easier — or you can start the booking again.',
+      'I\'m having trouble with that number. You can skip and add an email instead, or start the booking again.',
       'bot'
     );
     showQuickReplies(
       [
-        { label: 'Use email instead', value: 'email' },
+        { label: 'Skip for now', value: '__skip__' },
         { label: 'Start fresh', value: 'restart' },
       ],
       (value) => {
@@ -791,18 +790,37 @@
           startBookingFlow(true);
           return;
         }
-        bookingState.data.contactType = 'email';
-        bookingState.contactAttempts = 0;
-        promptContactValue();
+        promptContactEmail();
       }
     );
+  }
+
+  function formatContactSummary(phone, email) {
+    return {
+      phoneLabel: phone ? escapeHtml(phone) : 'Not provided',
+      emailLabel: email ? escapeHtml(email) : 'Not provided',
+    };
+  }
+
+  function getContactConfirmationMessage(name, treatment, requestedSlot, phone, email) {
+    const intro = `Thanks ${escapeHtml(name)} — we've received your request for ${escapeHtml(treatment)} on ${escapeHtml(requestedSlot)}.`;
+    if (phone && email) {
+      return `${intro} Our team will confirm shortly by text or email.`;
+    }
+    if (phone) {
+      return `${intro} Our team will confirm shortly by text.`;
+    }
+    if (email) {
+      return `${intro} Our team will confirm shortly by email.`;
+    }
+    return `${intro} Our team will be in touch to confirm.`;
   }
 
   function promptBookingConfirm() {
     bookingState.step = 'confirm';
     const name = visitorName || bookingState.data.name || 'Guest';
-    const { patientType, treatment, requestedSlot, contactType, contactValue } = bookingState.data;
-    const channelLabel = contactType === 'phone' ? 'Text' : 'Email';
+    const { patientType, treatment, requestedSlot, phone, email } = bookingState.data;
+    const contact = formatContactSummary(phone, email);
     addMessage(
       'Please check your details:' +
       '<ul>' +
@@ -810,7 +828,8 @@
       `<li><strong>Patient type:</strong> ${escapeHtml(patientType)}</li>` +
       `<li><strong>Treatment:</strong> ${escapeHtml(treatment)}</li>` +
       `<li><strong>Preferred time:</strong> ${escapeHtml(requestedSlot)}</li>` +
-      `<li><strong>${channelLabel}:</strong> ${escapeHtml(contactValue)}</li>` +
+      `<li><strong>Phone:</strong> ${contact.phoneLabel}</li>` +
+      `<li><strong>Email:</strong> ${contact.emailLabel}</li>` +
       '</ul>' +
       'Tap confirm to send your request — our team will be in touch to confirm.',
       'bot'
@@ -833,20 +852,23 @@
 
   function submitBookingRequest() {
     const name = visitorName || bookingState.data.name || 'Guest';
+    const phone = bookingState.data.phone || '';
+    const email = bookingState.data.email || '';
     const payload = {
       name,
       patientType: bookingState.data.patientType,
       treatment: bookingState.data.treatment,
       requestedSlot: bookingState.data.requestedSlot,
-      contactType: bookingState.data.contactType,
-      contactValue: bookingState.data.contactValue,
+      phone,
+      email,
+      contactType: phone ? 'phone' : email ? 'email' : 'none',
+      contactValue: phone || email || '',
     };
 
     notifyBookingRequest(payload);
 
-    const contactChannel = payload.contactType === 'phone' ? 'by text' : 'by email';
     addMessage(
-      `Thanks ${escapeHtml(name)} — we\'ve received your request for ${escapeHtml(payload.treatment)} on ${escapeHtml(payload.requestedSlot)}. Our team will confirm shortly, ${contactChannel}.`,
+      getContactConfirmationMessage(name, payload.treatment, payload.requestedSlot, phone, email),
       'bot'
     );
 
@@ -902,31 +924,47 @@
       return true;
     }
 
-    if (bookingState.step === 'contactValue') {
-      const { contactType } = bookingState.data;
-      if (contactType === 'phone' && !isValidPhone(trimmed)) {
+    if (bookingState.step === 'contactPhone') {
+      if (isSkipInput(trimmed)) {
+        promptContactEmail();
+        sendBtn.disabled = false;
+        return true;
+      }
+      if (!isValidPhone(trimmed)) {
         bookingState.contactAttempts = (bookingState.contactAttempts || 0) + 1;
         if (bookingState.contactAttempts >= 2) {
-          showContactRecoveryOptions();
+          showPhoneRecoveryOptions();
         } else {
-          addMessage('Please enter a valid UK mobile number (at least 10 digits).', 'bot');
+          addMessage('Please enter a valid UK mobile number (at least 10 digits), or tap Skip.', 'bot');
         }
         sendBtn.disabled = false;
         return true;
       }
-      if (contactType === 'email' && !isValidEmail(trimmed)) {
-        addMessage('Please enter a valid email address.', 'bot');
+      bookingState.data.phone = trimmed;
+      bookingState.contactAttempts = 0;
+      promptContactEmail();
+      sendBtn.disabled = false;
+      return true;
+    }
+
+    if (bookingState.step === 'contactEmail') {
+      if (isSkipInput(trimmed)) {
+        promptBookingConfirm();
         sendBtn.disabled = false;
         return true;
       }
-      bookingState.data.contactValue = trimmed;
-      bookingState.contactAttempts = 0;
+      if (!isValidEmail(trimmed)) {
+        addMessage('Please enter a valid email address, or tap Skip.', 'bot');
+        sendBtn.disabled = false;
+        return true;
+      }
+      bookingState.data.email = trimmed;
       promptBookingConfirm();
       sendBtn.disabled = false;
       return true;
     }
 
-    if (['patientType', 'treatment', 'requestedSlot', 'contactType', 'contactRecovery', 'confirm'].includes(bookingState.step)) {
+    if (['patientType', 'treatment', 'requestedSlot', 'contactPhoneRecovery', 'confirm'].includes(bookingState.step)) {
       addMessage('Please pick one of the options above.', 'bot');
       sendBtn.disabled = false;
       return true;
