@@ -41,6 +41,9 @@
     .sofia-msg a { color: #b8503a; font-weight: 600; }
     .sofia-cta-btn { align-self: flex-start; background: var(--accent); color: #fff; border: none; font-weight: 600; font-size: 13px; padding: 10px 18px; border-radius: 100px; cursor: pointer; animation: sofia-fade-up 0.28s ease; text-decoration: none; display: inline-block; }
     .sofia-cta-btn:hover { opacity: 0.92; }
+    .sofia-quick-replies { display: flex; flex-wrap: wrap; gap: 8px; animation: sofia-fade-up 0.28s ease; }
+    .sofia-quick-btn { background: #fff; border: 1px solid var(--accent); color: var(--accent); font-weight: 600; font-size: 12.5px; padding: 8px 14px; border-radius: 100px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease; }
+    .sofia-quick-btn:hover { background: var(--accent); color: #fff; }
     .sofia-typing { align-self: flex-start; background: #fff; border: 1px solid var(--line); border-radius: 14px; border-bottom-left-radius: 4px; padding: 12px 16px; display: flex; gap: 4px; }
     .sofia-typing span { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: sofia-bounce 1.2s infinite ease-in-out; }
     .sofia-typing span:nth-child(2) { animation-delay: 0.15s; }
@@ -96,46 +99,56 @@
 
   let visitorName = null;
   let hasOpenedBefore = false;
+  // TODO: replace with the real Make.com webhook URL once that scenario is built
+  const BOOKING_WEBHOOK_URL = 'https://hook.make.com/PLACEHOLDER_BOOKING_WEBHOOK_ID';
 
   // Real info per topic — 2-3 lines, no simulated booking, one button to the real Contact page.
   const TOPICS = [
     {
-      title: "I'm interested in Dental Implants",
-      desc: 'From £2,000 per tooth. Free consultation available.',
-      info: 'Dental implants replace a missing tooth with a titanium root and a porcelain crown, designed to match your natural teeth. Prices generally start around £2,000 per tooth, and for multiple missing teeth a single implant can sometimes support a 3-tooth bridge.',
-      ctaLabel: 'Book Dental Implants',
+      title: 'Routine Check-up',
+      desc: 'General examination and advice.',
+      info: 'A routine check-up covers a full examination of your teeth and gums, advice on any concerns, and X-rays if needed — the standard visit to keep on top of your dental health.',
+      service: 'Routine Check-up',
     },
     {
-      title: "I'd like to learn about Invisalign",
-      desc: 'Platinum Elite provider. Free consultation available.',
-      info: "We're a Platinum Elite Invisalign provider, using clear, removable aligners to straighten teeth without visible braces. Most treatment plans include a scan, custom aligners, and regular check-ins to track progress.",
-      ctaLabel: 'Book Invisalign',
-    },
-    {
-      title: "I'm interested in Teeth Whitening",
-      desc: 'From £20/month, interest-free plans available.',
-      info: 'Professional whitening starts from as little as £20/month on interest-free plans, with in-surgery and take-home kit options available depending on how quickly you want results.',
-      ctaLabel: 'Book Teeth Whitening',
-    },
-    {
-      title: 'I need a hygienist appointment',
+      title: 'Teeth Cleaning / Hygienist',
       desc: 'No referral needed — direct access available.',
-      info: 'Our hygienist offers a professional scale and polish plus advice on keeping your teeth and gums healthy between dentist visits. No referral is needed — you can book directly.',
-      ctaLabel: 'Book Hygienist Visit',
+      info: 'A professional scale and polish plus advice on keeping your teeth and gums healthy between visits. No referral needed — you can book directly.',
+      service: 'Teeth Cleaning / Hygienist',
     },
     {
-      title: "I'd like to know about Family Dentistry / NHS pricing",
+      title: 'Teeth Whitening',
+      desc: 'From £20/month, interest-free plans available.',
+      info: 'Professional whitening starts from as little as £20/month on interest-free plans, with in-surgery and take-home kit options depending on how quickly you want results.',
+      service: 'Teeth Whitening',
+    },
+    {
+      title: 'Invisalign',
+      desc: 'Platinum Elite provider. Free consultation available.',
+      info: "We're a Platinum Elite Invisalign provider, using clear, removable aligners to straighten teeth without visible braces. Most plans include a scan, custom aligners, and regular check-ins.",
+      service: 'Invisalign',
+    },
+    {
+      title: 'Dental Implants',
+      desc: 'From £2,000 per tooth. Free consultation available.',
+      info: 'Dental implants replace a missing tooth with a titanium root and a porcelain crown, matched to your natural teeth. Prices generally start around £2,000 per tooth.',
+      service: 'Dental Implants',
+    },
+    {
+      title: 'Family Dentistry / NHS Pricing',
       desc: 'NHS bands from £23.80.',
       info: 'We welcome families and children, and offer NHS treatment in standard bands: Band 1 from £23.80, Band 2 £65.20, Band 3 £282.80, covering everything from check-ups to crowns and bridges.',
-      ctaLabel: 'Ask About NHS / Family Care',
-    },
-    {
-      title: "I'm a new patient",
-      desc: 'See what your first visit covers.',
-      info: 'Your first visit covers a conversation about your dental and general health, a full inspection with X-rays if needed, and a clear, no-obligation discussion of any treatment options — no pressure to proceed with anything.',
-      ctaLabel: 'Book Your First Visit',
+      service: 'Family Dentistry / NHS',
     },
   ];
+
+  const NEW_PATIENT_ITEM = {
+    title: "I'm a new patient",
+    desc: 'See what your first visit covers.',
+    info: 'Your first visit covers a conversation about your dental and general health, a full inspection with X-rays if needed, and a clear, no-obligation discussion of any treatment options — no pressure to proceed with anything.',
+    service: 'New Patient Consultation',
+    isNewPatient: true,
+  };
 
   const EMERGENCY = { title: "I have a dental emergency / I'm in pain", desc: 'Please contact us urgently.', urgent: true };
 
@@ -148,8 +161,14 @@
   function addUserMsg(t) {
     const d = document.createElement('div'); d.className = 'sofia-msg sofia-msg-user'; d.textContent = t; body.appendChild(d); scrollDown();
   }
-  function addCtaButton(label, href) {
-    const a = document.createElement('a'); a.className = 'sofia-cta-btn'; a.textContent = label; a.href = href; body.appendChild(a); scrollDown();
+  function addQuickReplies(options, handler) {
+    const wrap = document.createElement('div'); wrap.className = 'sofia-quick-replies';
+    options.forEach((label) => {
+      const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'sofia-quick-btn'; btn.textContent = label;
+      btn.onclick = () => { wrap.remove(); addUserMsg(label); handler(label); };
+      wrap.appendChild(btn);
+    });
+    body.appendChild(wrap); scrollDown();
   }
   function showTyping() {
     const t = document.createElement('div'); t.className = 'sofia-typing'; t.id = 'sofia-typing-indicator'; t.innerHTML = '<span></span><span></span><span></span>'; body.appendChild(t); scrollDown();
@@ -164,7 +183,7 @@
 
   function showMenu() {
     const instr = document.createElement('div'); instr.className = 'sofia-instruction'; instr.textContent = 'Tap an option below to get started.'; body.appendChild(instr);
-    [...TOPICS, EMERGENCY].forEach((item, i) => {
+    [...TOPICS, NEW_PATIENT_ITEM, EMERGENCY].forEach((item, i) => {
       const card = document.createElement('div');
       card.className = 'sofia-card' + (item.urgent ? ' sofia-card-urgent' : '');
       card.style.animationDelay = (i * 40) + 'ms';
@@ -183,9 +202,48 @@
       replyWithDelay("Please call us urgently on <a href='tel:01702553106'>01702 553 106</a> so we can help right away.");
       return;
     }
-    replyWithDelay(item.info, () => {
-      addCtaButton(item.ctaLabel, 'contact.html');
+    replyWithDelay('Would you like to know more first, or go ahead and book?', () => {
+      addQuickReplies(['Tell me more', 'Book now'], (choice) => {
+        if (choice === 'Tell me more') {
+          replyWithDelay(item.info, () => startBookingIntent(item));
+        } else {
+          startBookingIntent(item);
+        }
+      });
     });
+  }
+
+  let bookingIntentData = {};
+  let bookingState = null;
+
+  function startBookingIntent(item) {
+    bookingIntentData = { service: item.service };
+    replyWithDelay('Are you a new or existing patient?', () => {
+      addQuickReplies(['New patient', 'Existing patient'], (patientType) => {
+        bookingIntentData.patientType = patientType;
+        replyWithDelay('How would you like us to contact you to confirm — text or email?', () => {
+          addQuickReplies(['Text me', 'Email me'], (choice) => {
+            bookingState = choice === 'Text me' ? 'awaiting-phone' : 'awaiting-email';
+            replyWithDelay(choice === 'Text me' ? 'What number should I send it to?' : 'What email address should I send it to?');
+          });
+        });
+      });
+    });
+  }
+
+  function submitBookingIntent(contactValue, contactType) {
+    bookingState = null;
+    const name = visitorName || 'there';
+    replyWithDelay(`Thanks${visitorName ? ', ' + visitorName : ''} — we've received your request for ${bookingIntentData.service}. Our team will contact you shortly to confirm a time.`);
+
+    fetch(BOOKING_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: visitorName, patientType: bookingIntentData.patientType, service: bookingIntentData.service,
+        contactType, contactValue,
+      }),
+    }).catch((err) => console.error('Sofia booking-intent webhook failed:', err));
   }
 
   function extractName(text) {
@@ -223,6 +281,8 @@
   }
 
   function handleGeneralInput(text) {
+    if (bookingState === 'awaiting-phone') { submitBookingIntent(text.trim(), 'phone'); return; }
+    if (bookingState === 'awaiting-email') { submitBookingIntent(text.trim(), 'email'); return; }
     if (!visitorName) {
       const name = extractName(text);
       if (!name) { replyWithDelay("I didn't quite catch your name — what should I call you?"); return; }
