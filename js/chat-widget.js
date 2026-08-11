@@ -38,8 +38,8 @@
     .sofia-card-sub { font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.4; }
     .sofia-card-chevron { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 18px; }
     .sofia-card-urgent .sofia-card-title { color: #b84a3a; }
-    .sofia-msg { max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.55; animation: sofia-fade-up 0.28s ease; }
-    .sofia-msg-bot { background: #fef4f1; border: 1px solid var(--line); border-left: 3px solid var(--accent); align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .sofia-msg { max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.55; animation: sofia-fade-up 0.28s ease; font-weight: 500; }
+    .sofia-msg-bot { background: #fef4f1; border: 1px solid var(--line); border-left: 3px solid var(--accent); align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); color: var(--text); }
     .sofia-msg-user { background: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
     .sofia-msg a { color: #b8503a; font-weight: 600; }
     .sofia-cta-btn { align-self: flex-start; background: var(--accent); color: #fff; border: none; font-weight: 600; font-size: 13px; padding: 10px 18px; border-radius: 100px; cursor: pointer; animation: sofia-fade-up 0.28s ease; text-decoration: none; display: inline-block; }
