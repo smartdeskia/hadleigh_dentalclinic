@@ -380,7 +380,7 @@
     const t = userText.toLowerCase();
     const footer = ' Call <a href="tel:01702553106">01702 553 106</a> or use our <a href="contact.html">contact form</a>.';
     if (t.includes('emergency') || t.includes('pain') || t.includes('urgent')) return "Please call us urgently on <a href='tel:01702553106'>01702 553 106</a>.";
-    if (/\b(thank\s*you|thanks|cheers)\b/.test(t) && t.split(/\s+/).length <= 5) return "You're welcome! Let us know if there's anything else I can help with.";
+    if (/\b(thank\s*(you|u)|thanks?|thnk|thx|ty|cheers)\b/i.test(t) && t.split(/\s+/).length <= 5) return "You're welcome! Let us know if there's anything else I can help with.";
     if (t.includes('cancel')) return "I'm not able to cancel appointments here — please call us on <a href='tel:01702553106'>01702 553 106</a>.";
     if (t.includes('reschedule')) return "I'm not able to reschedule appointments here — please call us on <a href='tel:01702553106'>01702 553 106</a>.";
     if (t.includes('hour') || t.includes('open') || t.includes('close')) return "We're open Mon&ndash;Fri 9:00&ndash;18:00, with occasional Saturdays. Closed Sundays.";
