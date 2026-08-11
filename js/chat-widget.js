@@ -348,8 +348,21 @@
   }
 
   function handleGeneralInput(text) {
-    if (bookingState === 'awaiting-phone') { reviewBookingIntent(text.trim(), 'phone'); return; }
-    if (bookingState === 'awaiting-email') { reviewBookingIntent(text.trim(), 'email'); return; }
+    if (bookingState === 'awaiting-phone') {
+      const val = text.trim();
+      const digits = val.replace(/[^0-9]/g, '');
+      const looksValid = /^[0-9+()\s-]{7,}$/.test(val) && digits.length >= 7;
+      if (!looksValid) { replyWithDelay("That doesn't look like a valid phone number — could you try again?"); return; }
+      reviewBookingIntent(val, 'phone');
+      return;
+    }
+    if (bookingState === 'awaiting-email') {
+      const val = text.trim();
+      const looksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+      if (!looksValid) { replyWithDelay("That doesn't look like a valid email address — could you try again?"); return; }
+      reviewBookingIntent(val, 'email');
+      return;
+    }
     if (!visitorName) {
       const name = extractName(text);
       if (!name) { replyWithDelay("I didn't quite catch your name — what should I call you?"); return; }
