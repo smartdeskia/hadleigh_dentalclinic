@@ -36,8 +36,8 @@
     .sofia-card-chevron { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 18px; }
     .sofia-card-urgent .sofia-card-title { color: #b84a3a; }
     .sofia-msg { max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: 13.5px; line-height: 1.55; animation: sofia-fade-up 0.28s ease; }
-    .sofia-msg-bot { background: #fff; border: 1px solid var(--line); align-self: flex-start; border-bottom-left-radius: 4px; }
-    .sofia-msg-user { background: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+    .sofia-msg-bot { background: #fef4f1; border: 1px solid var(--line); border-left: 3px solid var(--accent); align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+    .sofia-msg-user { background: var(--primary); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
     .sofia-msg a { color: #b8503a; font-weight: 600; }
     .sofia-cta-btn { align-self: flex-start; background: var(--accent); color: #fff; border: none; font-weight: 600; font-size: 13px; padding: 10px 18px; border-radius: 100px; cursor: pointer; animation: sofia-fade-up 0.28s ease; text-decoration: none; display: inline-block; }
     .sofia-cta-btn:hover { opacity: 0.92; }
@@ -107,37 +107,43 @@
     {
       title: 'Routine Check-up',
       desc: 'General examination and advice.',
-      info: 'A routine check-up covers a full examination of your teeth and gums, advice on any concerns, and X-rays if needed — the standard visit to keep on top of your dental health.',
+      brief: 'A full examination of your teeth and gums, advice on any concerns, and X-rays if needed.',
+      anchor: 'general-dentistry.html',
       service: 'Routine Check-up',
     },
     {
       title: 'Teeth Cleaning / Hygienist',
       desc: 'No referral needed — direct access available.',
-      info: 'A professional scale and polish plus advice on keeping your teeth and gums healthy between visits. No referral needed — you can book directly.',
+      brief: 'A professional scale and polish, plus advice on keeping teeth and gums healthy between visits. No referral needed.',
+      anchor: 'hygiene-plus.html#what-we-do',
       service: 'Teeth Cleaning / Hygienist',
     },
     {
       title: 'Teeth Whitening',
       desc: 'From £20/month, interest-free plans available.',
-      info: 'Professional whitening starts from as little as £20/month on interest-free plans, with in-surgery and take-home kit options depending on how quickly you want results.',
+      brief: 'In-surgery and take-home kit options, from as little as £20/month on interest-free plans.',
+      anchor: 'teeth-whitening.html#pricing',
       service: 'Teeth Whitening',
     },
     {
       title: 'Invisalign',
       desc: 'Platinum Elite provider. Free consultation available.',
-      info: "We're a Platinum Elite Invisalign provider, using clear, removable aligners to straighten teeth without visible braces. Most plans include a scan, custom aligners, and regular check-ins.",
+      brief: "We're a Platinum Elite Invisalign provider — clear, removable aligners with regular check-ins to track progress.",
+      anchor: 'invisalign.html#five-steps',
       service: 'Invisalign',
     },
     {
       title: 'Dental Implants',
       desc: 'From £2,000 per tooth. Free consultation available.',
-      info: 'Dental implants replace a missing tooth with a titanium root and a porcelain crown, matched to your natural teeth. Prices generally start around £2,000 per tooth.',
+      brief: 'A titanium root and porcelain crown matched to your natural teeth, generally from £2,000 per tooth.',
+      anchor: 'dental-implants.html#cost',
       service: 'Dental Implants',
     },
     {
       title: 'Family Dentistry / NHS Pricing',
       desc: 'NHS bands from £23.80.',
-      info: 'We welcome families and children, and offer NHS treatment in standard bands: Band 1 from £23.80, Band 2 £65.20, Band 3 £282.80, covering everything from check-ups to crowns and bridges.',
+      brief: 'NHS treatment in standard bands: Band 1 from £23.80, Band 2 £65.20, Band 3 £282.80.',
+      anchor: 'family-dentistry.html#nhs-pricing',
       service: 'Family Dentistry / NHS',
     },
   ];
@@ -145,7 +151,8 @@
   const NEW_PATIENT_ITEM = {
     title: "I'm a new patient",
     desc: 'See what your first visit covers.',
-    info: 'Your first visit covers a conversation about your dental and general health, a full inspection with X-rays if needed, and a clear, no-obligation discussion of any treatment options — no pressure to proceed with anything.',
+    brief: 'A conversation about your dental health, a full inspection with X-rays if needed, and a no-obligation discussion of options.',
+    anchor: 'new-patients.html',
     service: 'New Patient Consultation',
     isNewPatient: true,
   };
@@ -205,7 +212,7 @@
     replyWithDelay('Would you like to know more first, or go ahead and book?', () => {
       addQuickReplies(['Tell me more', 'Book now'], (choice) => {
         if (choice === 'Tell me more') {
-          replyWithDelay(item.info, () => startBookingIntent(item));
+          addBotMsg(`${item.brief} <a href="${item.anchor}" target="_blank" rel="noopener">See full details</a>`);
         } else {
           startBookingIntent(item);
         }
@@ -231,9 +238,31 @@
     });
   }
 
-  function submitBookingIntent(contactValue, contactType) {
+  function reviewBookingIntent(contactValue, contactType) {
     bookingState = null;
-    const name = visitorName || 'there';
+    bookingIntentData.contactType = contactType;
+    bookingIntentData.contactValue = contactValue;
+    const contactLabel = contactType === 'phone' ? 'Phone' : 'Email';
+    const summary = `
+      <strong>Please check your details:</strong><br>
+      &bull; Name: ${visitorName || 'Not given'}<br>
+      &bull; Patient type: ${bookingIntentData.patientType}<br>
+      &bull; Service: ${bookingIntentData.service}<br>
+      &bull; ${contactLabel}: ${contactValue}<br><br>
+      Tap Confirm to send your request, or Start Over to change something.
+    `;
+    replyWithDelay(summary, () => {
+      addQuickReplies(['Confirm request', 'Start over'], (choice) => {
+        if (choice === 'Confirm request') {
+          submitBookingIntent();
+        } else {
+          startOver();
+        }
+      });
+    });
+  }
+
+  function submitBookingIntent() {
     replyWithDelay(`Thanks${visitorName ? ', ' + visitorName : ''} — we've received your request for ${bookingIntentData.service}. Our team will contact you shortly to confirm a time.`);
 
     fetch(BOOKING_WEBHOOK_URL, {
@@ -241,9 +270,15 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name: visitorName, patientType: bookingIntentData.patientType, service: bookingIntentData.service,
-        contactType, contactValue,
+        contactType: bookingIntentData.contactType, contactValue: bookingIntentData.contactValue,
       }),
     }).catch((err) => console.error('Sofia booking-intent webhook failed:', err));
+  }
+
+  function startOver() {
+    bookingIntentData = {};
+    bookingState = null;
+    replyWithDelay('No problem — let\'s start again. What would you like help with?', showMenu);
   }
 
   function extractName(text) {
@@ -281,8 +316,8 @@
   }
 
   function handleGeneralInput(text) {
-    if (bookingState === 'awaiting-phone') { submitBookingIntent(text.trim(), 'phone'); return; }
-    if (bookingState === 'awaiting-email') { submitBookingIntent(text.trim(), 'email'); return; }
+    if (bookingState === 'awaiting-phone') { reviewBookingIntent(text.trim(), 'phone'); return; }
+    if (bookingState === 'awaiting-email') { reviewBookingIntent(text.trim(), 'email'); return; }
     if (!visitorName) {
       const name = extractName(text);
       if (!name) { replyWithDelay("I didn't quite catch your name — what should I call you?"); return; }
