@@ -25,8 +25,11 @@
     #sofia-header-name { font-family: Georgia, serif; font-weight: 600; font-size: 16px; }
     #sofia-header-sub { font-size: 12px; color: rgba(255,255,255,0.65); display: flex; align-items: center; gap: 6px; }
     #sofia-header-sub::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
-    #sofia-close-btn { background: none; border: none; color: rgba(255,255,255,0.75); cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; margin-left: auto; }
-    #sofia-close-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    #sofia-header-actions { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+    #sofia-refresh-btn, #sofia-close-btn { background: none; border: none; color: rgba(255,255,255,0.75); cursor: pointer; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 8px; flex-shrink: 0; }
+    #sofia-refresh-btn:hover, #sofia-close-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    #sofia-refresh-btn.spinning svg { animation: sofia-spin 0.5s ease; }
+    @keyframes sofia-spin { from { transform: rotate(0deg); } to { transform: rotate(180deg); } }
     #sofia-body { flex: 0 1 auto; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
     .sofia-instruction { font-size: 13px; color: var(--muted); margin: 4px 0 2px; }
     .sofia-card { position: relative; background: #fff; border: 1px solid var(--line); border-radius: 14px; padding: 14px 36px 14px 16px; cursor: pointer; animation: sofia-fade-up 0.25s ease backwards; transition: border-color 0.15s ease, box-shadow 0.15s ease; }
@@ -76,9 +79,14 @@
           <div id="sofia-header-name">Sofia</div>
           <div id="sofia-header-sub">Hadleigh Dental Assistant</div>
         </div>
-        <button id="sofia-close-btn" aria-label="Close chat">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <div id="sofia-header-actions">
+          <button id="sofia-refresh-btn" aria-label="Start over">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><polyline points="21 3 21 9 15 9"/></svg>
+          </button>
+          <button id="sofia-close-btn" aria-label="Close chat">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
       </div>
       <div id="sofia-body"></div>
       <div id="sofia-input-row">
@@ -94,6 +102,7 @@
   const body = document.getElementById('sofia-body');
   const launcher = document.getElementById('sofia-launcher');
   const closeBtn = document.getElementById('sofia-close-btn');
+  const refreshBtn = document.getElementById('sofia-refresh-btn');
   const input = document.getElementById('sofia-input');
   const sendBtn = document.getElementById('sofia-send');
 
@@ -366,8 +375,19 @@
   function closePanel() { document.body.classList.remove('sofia-open'); }
   function toggle() { document.body.classList.contains('sofia-open') ? closePanel() : openPanel(); }
 
+  function fullReset() {
+    visitorName = null;
+    bookingState = null;
+    bookingIntentData = {};
+    body.innerHTML = '';
+    refreshBtn.classList.add('spinning');
+    setTimeout(() => refreshBtn.classList.remove('spinning'), 500);
+    replyWithDelay("Hi! I'm Sofia 👋 What's your name?");
+  }
+
   launcher.addEventListener('click', toggle);
   closeBtn.addEventListener('click', closePanel);
+  refreshBtn.addEventListener('click', fullReset);
   sendBtn.addEventListener('click', sendMessage);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
 
