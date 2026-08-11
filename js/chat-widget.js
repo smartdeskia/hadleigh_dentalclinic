@@ -342,16 +342,32 @@
   function extractName(text) {
     let cleaned = text.trim().replace(/[!.?]+$/, '').trim();
     if (!cleaned) return null;
+    let usedExplicitIntro = false;
     const nameIsMatch = cleaned.match(/\bname is\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i);
-    if (nameIsMatch) cleaned = nameIsMatch[1].trim();
+    if (nameIsMatch) { cleaned = nameIsMatch[1].trim(); usedExplicitIntro = true; }
     else {
       const explicitMatch = cleaned.match(/(?:i am|i'?m|im|it'?s|its|this is|call me)\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i);
-      if (explicitMatch) cleaned = explicitMatch[1].trim();
+      if (explicitMatch) { cleaned = explicitMatch[1].trim(); usedExplicitIntro = true; }
       else {
         const leads = [/^(hi|hello|hey|hiya)[,!\s]+/i, /^(hi|hello|hey|hiya)$/i, /^(i am|i'?m|im)\s+/i, /^(this is|it'?s|its|call me)\s+/i];
         let changed = true;
         while (changed) { changed = false; for (const p of leads) { const n = cleaned.replace(p, '').trim(); if (n !== cleaned) { cleaned = n; changed = true; } } }
       }
+    }
+    // If we matched "name is"/"I'm" etc., the capture is greedy and may run on into the
+    // rest of the sentence ("name is nick i would like to book..."). Trim at the first
+    // word that clearly isn't part of a name, capping at 3 name-words either way.
+    if (usedExplicitIntro) {
+      const stopWords = /^(i|and|but|so|who|that|would|like|want|need|please|to|im|is|was|will|can|could|d|ll|ve)$/i;
+      const words = cleaned.split(/\s+/);
+      const nameWords = [];
+      for (const w of words) {
+        const bare = w.replace(/'/g, '');
+        if (stopWords.test(bare)) break;
+        nameWords.push(w);
+        if (nameWords.length >= 3) break;
+      }
+      cleaned = nameWords.join(' ');
     }
     cleaned = cleaned.replace(/[!.?]+$/, '').trim();
     if (!cleaned || cleaned.length > 40 || cleaned.split(/\s+/).length > 3) return null;
