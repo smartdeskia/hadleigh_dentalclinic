@@ -1821,6 +1821,35 @@ body.chat-open .chat-panel {
   min-height: 52px;
 }
 
+.chat-panel:has(.chat-transcript.has-messages) .chat-body {
+  flex: 0 0 auto;
+  overflow-y: visible;
+}
+
+.chat-panel:has(.chat-transcript.has-messages) .chat-menu-intro {
+  padding: 8px 16px 4px;
+}
+
+.chat-panel:has(.chat-transcript.has-messages) .chat-menu-list {
+  gap: 4px;
+  padding: 0 10px 6px;
+}
+
+.chat-panel:has(.chat-transcript.has-messages) .chat-menu-item {
+  padding: 6px 10px 6px 12px;
+}
+
+.chat-panel:has(.chat-transcript.has-messages) .chat-menu-item-desc {
+  font-size: 0.72rem;
+  line-height: 1.25;
+}
+
+.chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
+  flex: 0 0 auto;
+  max-height: none;
+  padding: 6px 16px 2px;
+}
+
 @media (min-width: 768px) {
   .chat-panel {
     width: 400px;
@@ -1830,21 +1859,25 @@ body.chat-open .chat-panel {
     bottom: 88px;
   }
 
+  .chat-panel:has(.chat-transcript.has-messages) {
+    height: min(680px, calc(100vh - 80px));
+    max-height: min(680px, calc(100vh - 80px));
+  }
+
   .chat-transcript {
     max-height: 160px;
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-body {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
+    flex: 0 0 auto;
+    overflow-y: visible;
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-transcript {
     flex: 0 0 auto;
-    max-height: 150px;
+    max-height: none;
     min-height: 0;
-    overflow-y: auto;
+    overflow-y: visible;
     padding: 6px 16px 2px;
   }
 
@@ -1854,17 +1887,17 @@ body.chat-open .chat-panel {
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-menu-intro {
-    padding: 8px 16px 4px;
+    padding: 6px 16px 3px;
     font-size: 0.8rem;
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-menu-list {
-    gap: 5px;
-    padding: 0 10px 6px;
+    gap: 4px;
+    padding: 0 10px 4px;
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-menu-item {
-    padding: 7px 10px 7px 12px;
+    padding: 6px 10px 6px 12px;
   }
 
   .chat-panel:has(.chat-transcript.has-messages) .chat-menu-item-title {
@@ -2076,6 +2109,11 @@ body.chat-open .chat-panel {
     min-height: 0;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  .chat-panel:has(.chat-transcript.has-messages) .chat-body {
+    flex: 0 0 auto;
+    overflow-y: visible;
   }
 
   .chat-transcript.has-messages {
