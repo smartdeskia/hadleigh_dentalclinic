@@ -373,6 +373,13 @@
     return "That's a great question — I don't have the specific details on hand, but our team can help with almost anything dental." + footer;
   }
 
+  function isGenericBookingIntent(text) {
+    const t = text.toLowerCase();
+    const hasBookingWord = (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
+      && !t.includes('cancel') && !t.includes('reschedul');
+    return hasBookingWord;
+  }
+
   function handleGeneralInput(text) {
     if (bookingState === 'awaiting-phone') {
       const val = text.trim();
@@ -394,6 +401,15 @@
       if (!name) { replyWithDelay("I didn't quite catch your name — what should I call you?"); return; }
       visitorName = name;
       replyWithDelay(`Nice to meet you, ${name}! How can I help you today?`, showMenu);
+      return;
+    }
+    if (isGenericBookingIntent(text)) {
+      replyWithDelay('Sure — which service would you like to book?', () => {
+        addQuickReplies(TOPICS.map((t) => t.title), (chosenTitle) => {
+          const chosen = TOPICS.find((t) => t.title === chosenTitle);
+          startBookingIntent(chosen ? chosen.service : chosenTitle, null);
+        });
+      });
       return;
     }
     replyWithDelay(getBotReply(text));
