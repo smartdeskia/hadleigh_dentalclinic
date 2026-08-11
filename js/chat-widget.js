@@ -23,16 +23,19 @@
       title: "I'm interested in Dental Implants",
       description: 'From £2,000 per tooth. Book a free consultation.',
       href: 'dental-implants.html#cost',
+      treatmentName: 'Dental Implants',
     },
     {
       title: "I'd like to learn about Invisalign",
       description: 'Platinum Elite provider. Free consultation available.',
       href: 'invisalign.html#five-steps',
+      treatmentName: 'Invisalign',
     },
     {
       title: "I'm interested in Teeth Whitening",
       description: 'From £20/month, interest-free plans available.',
       href: 'teeth-whitening.html#pricing',
+      treatmentName: 'Teeth Whitening',
     },
     {
       title: "I'd like to know about Family Dentistry / NHS pricing",
@@ -43,6 +46,7 @@
       title: 'I need a hygienist appointment',
       description: 'No referral needed — direct access available.',
       href: 'hygiene-plus.html#what-we-do',
+      treatmentName: 'Hygienist',
     },
     {
       title: "I have a dental emergency / I'm in pain",
@@ -77,6 +81,15 @@
     <p class="chat-menu-intro">Choose a topic below and we'll take you straight to the right place.</p>
     <nav class="chat-menu-list" aria-label="Help topics"></nav>
   `;
+
+  // PATCH 1: messagesEl created + appended BEFORE chatBody, so the greeting
+  // (which renders into messagesEl) appears above the menu, not below it.
+  const messagesEl = document.createElement('div');
+  messagesEl.id = 'chat-messages';
+  messagesEl.className = 'chat-transcript';
+  messagesEl.setAttribute('aria-live', 'polite');
+  panel.appendChild(messagesEl);
+
   panel.appendChild(chatBody);
 
   const menuList = chatBody.querySelector('.chat-menu-list');
@@ -88,18 +101,22 @@
     link.innerHTML = `
       <span class="chat-menu-item-title">${item.title}</span>
       <span class="chat-menu-item-desc">${item.description}</span>
+      <span class="chat-menu-item-chevron" aria-hidden="true">&#8250;</span>
     `;
-    link.addEventListener('click', () => {
-      document.body.classList.remove('chat-open');
-    });
+    if (item.treatmentName) {
+      // PATCH 3: treatment-specific items offer "read more or book?" instead of navigating immediately
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        addMessage(item.title, 'user');
+        offerReadMoreOrBook(item.treatmentName, item.href);
+      });
+    } else {
+      link.addEventListener('click', () => {
+        document.body.classList.remove('chat-open');
+      });
+    }
     menuList.appendChild(link);
   });
-
-  const messagesEl = document.createElement('div');
-  messagesEl.id = 'chat-messages';
-  messagesEl.className = 'chat-transcript';
-  messagesEl.setAttribute('aria-live', 'polite');
-  panel.appendChild(messagesEl);
 
   const form = document.createElement('form');
   form.id = 'chat-input-form';
@@ -124,7 +141,6 @@
   }
 
   function formatBotReply(text) {
-    // Safety net: convert any markdown links to HTML (replies should use HTML directly).
     return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
   }
 
@@ -146,7 +162,6 @@
     const hasThanks = /\b(thank\s*you|thanks?|thnk|thx)\b/.test(t);
     const hasBye = /\b(bye|goodbye|good bye)\b/.test(t);
     const maxWords = hasThanks && hasBye ? 5 : 4;
-    // Short closings only — skip longer messages like "thanks for explaining…"
     if (t.split(/\s+/).length > maxWords) return false;
     if (/thanks?\s+(for|about|regarding)\b/.test(t)) return false;
     if (hasThanks) return true;
@@ -169,7 +184,6 @@
 
   function mentionsCleaning(text) {
     const t = text.toLowerCase();
-    // "clean" covers cleaning/cleanings and typos like "teetgh cleaning" (no exact "teeth" required).
     return t.includes('hygien') || t.includes('clean') || t.includes('scale') || t.includes('polish');
   }
 
@@ -179,7 +193,6 @@
 
   function mentionsInvisalign(text) {
     const t = normalizeForMatch(text);
-    // inv\w*lign covers invisalign, invaslign, and trailing punctuation after normalize.
     return /inv\w*lign/.test(t) || t.includes('aligner') || t.includes('brace');
   }
 
@@ -201,7 +214,6 @@
 
     let fromExplicitIntro = false;
 
-    // "name is" anywhere — handles typos ("may name is Rich") and extra lead-ins ("Hi my name is Sophie").
     const nameIsMatch = cleaned.match(/\bname is\s+([a-zA-Z][a-zA-Z\s'-]{0,38})/i);
     if (nameIsMatch) {
       cleaned = nameIsMatch[1].trim();
@@ -505,11 +517,140 @@
     }, 700 + Math.random() * 500);
   }
 
+  /* ---- PATCH 4: quick replies + booking flow ---- */
+
+  function addQuickReplies(options, handler) {
+    const wrap = document.createElement('div');
+    wrap.className = 'chat-quick-replies';
+    options.forEach((label) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'chat-quick-btn';
+      btn.textContent = label;
+      btn.addEventListener('click', () => {
+        wrap.remove();
+        addMessage(label, 'user');
+        handler(label);
+      });
+      wrap.appendChild(btn);
+    });
+    messagesEl.classList.add('has-messages');
+    messagesEl.appendChild(wrap);
+    scrollTranscriptToLatest();
+  }
+
+  function offerReadMoreOrBook(treatmentName, href) {
+    replyWithDelay(`Sure — would you like to read more about ${escapeHtml(treatmentName)} first, or go ahead and book?`);
+    setTimeout(() => {
+      addQuickReplies(['Tell me more', 'Book an appointment'], (choice) => {
+        if (choice === 'Tell me more') {
+          window.location.href = href;
+        } else {
+          startBooking(treatmentName);
+        }
+      });
+    }, 900);
+  }
+
+  let bookingState = null;
+  let bookingData = {};
+  const BOOKING_TREATMENTS = ['General Check-up', 'Invisalign', 'Teeth Whitening', 'Dental Implants', 'Hygienist'];
+  const BOOKING_SLOTS = ['Tuesday 10:00 AM', 'Wednesday 2:30 PM', 'Thursday 4:00 PM'];
+  // TODO: replace with the real Make.com webhook URL once that scenario is built
+  const BOOKING_WEBHOOK_URL = 'https://hook.make.com/PLACEHOLDER_BOOKING_WEBHOOK_ID';
+
+  function startBooking(preselectedTreatment) {
+    bookingState = 'patient-type';
+    replyWithDelay("Great — let's get you booked in. Are you a new or existing patient?");
+    setTimeout(() => {
+      addQuickReplies(['New patient', 'Existing patient'], (choice) => {
+        bookingData.patientType = choice;
+        if (preselectedTreatment) {
+          bookingData.treatment = preselectedTreatment;
+          showBookingSlots(preselectedTreatment);
+        } else {
+          replyWithDelay('What would you like to book?');
+          setTimeout(() => {
+            addQuickReplies(BOOKING_TREATMENTS, (treatment) => {
+              bookingData.treatment = treatment;
+              showBookingSlots(treatment);
+            });
+          }, 900);
+        }
+      });
+    }, 900);
+  }
+
+  function showBookingSlots(treatment) {
+    replyWithDelay(`I have openings for ${escapeHtml(treatment)}:`);
+    setTimeout(() => {
+      addQuickReplies(BOOKING_SLOTS, (slot) => {
+        bookingData.slot = slot;
+        if (visitorName) {
+          askBookingContactPreference();
+        } else {
+          bookingState = 'awaiting-booking-name';
+          replyWithDelay('What name should I book this under?');
+        }
+      });
+    }, 900);
+  }
+
+  function askBookingContactPreference() {
+    replyWithDelay(`Thanks, ${escapeHtml(visitorName)}! How would you like your confirmation — by text or email?`);
+    setTimeout(() => {
+      addQuickReplies(['Text me', 'Email me'], (choice) => {
+        bookingState = choice === 'Text me' ? 'awaiting-phone' : 'awaiting-email';
+        replyWithDelay(choice === 'Text me' ? 'What number should I send it to?' : 'What email address should I send it to?');
+      });
+    }, 900);
+  }
+
+  function submitBookingRequest(contactValue, contactType) {
+    bookingData.contact = contactValue;
+    bookingData.contactType = contactType;
+    bookingState = null;
+    const contactLine = contactType === 'email'
+      ? `We'll email a confirmation to ${escapeHtml(contactValue)} once it's set.`
+      : `We'll text a confirmation to ${escapeHtml(contactValue)} once it's set.`;
+    replyWithDelay(`Thanks, ${escapeHtml(visitorName)} — we've received your request. ${escapeHtml(bookingData.treatment)} on ${escapeHtml(bookingData.slot)}. Our team will confirm shortly. ${contactLine}`);
+
+    fetch(BOOKING_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: visitorName,
+        patientType: bookingData.patientType,
+        treatment: bookingData.treatment,
+        requestedSlot: bookingData.slot,
+        contactType: bookingData.contactType,
+        contactValue: bookingData.contact,
+      }),
+    }).catch((err) => console.error('Sofia booking webhook failed:', err));
+  }
+
   function handleSend(text) {
     if (!text.trim()) return;
     addMessage(text, 'user');
     input.value = '';
     sendBtn.disabled = true;
+
+    /* PATCH 5: route booking-flow text replies before the greeting/general logic */
+    if (bookingState === 'awaiting-booking-name') {
+      const name = extractName(text) || text.trim();
+      visitorName = formatName(name);
+      greetingState = 'ready'; // in case the initial name prompt was skipped in favour of booking
+      askBookingContactPreference();
+      return;
+    }
+    if (bookingState === 'awaiting-phone') {
+      submitBookingRequest(text.trim(), 'phone');
+      return;
+    }
+    if (bookingState === 'awaiting-email') {
+      submitBookingRequest(text.trim(), 'email');
+      return;
+    }
 
     if (greetingState === 'awaiting_name' || greetingState === 'awaiting_name_retry') {
       const name = extractName(text);
