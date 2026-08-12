@@ -389,6 +389,31 @@
     return "That's a great question — I don't have the specific details on hand, but our team can help with almost anything dental." + footer;
   }
 
+  function matchServiceFromText(text) {
+    const t = text.toLowerCase();
+    // Order matters slightly — more specific checks first to avoid one keyword
+    // accidentally matching the wrong service.
+    if (/inv\w*lign/.test(t) || t.includes('aligner') || t.includes('brace')) {
+      return TOPICS.find((s) => s.service === 'Invisalign');
+    }
+    if (t.includes('implant')) {
+      return TOPICS.find((s) => s.service === 'Dental Implants');
+    }
+    if (t.includes('whiten') || t.includes('bleach')) {
+      return TOPICS.find((s) => s.service === 'Teeth Whitening');
+    }
+    if (t.includes('hygien') || t.includes('clean') || t.includes('scale') || t.includes('polish')) {
+      return TOPICS.find((s) => s.service === 'Teeth Cleaning / Hygienist');
+    }
+    if (t.includes('check-up') || t.includes('checkup') || t.includes('check up') || t.includes('routine')) {
+      return TOPICS.find((s) => s.service === 'Routine Check-up');
+    }
+    if (t.includes('nhs') || t.includes('family')) {
+      return TOPICS.find((s) => s.service === 'Family Dentistry / NHS');
+    }
+    return null;
+  }
+
   function isGenericBookingIntent(text) {
     const t = text.toLowerCase();
     const hasBookingWord = (t.includes('book') || t.includes('appointment') || t.includes('consult') || (t.includes('schedule') && !t.includes('reschedule')))
@@ -424,7 +449,7 @@
       replyWithDelay('No worries — take a look through the options below, or ask me anything specific.', showMenu);
       return;
     }
-    if (/^(nothing|no thanks|no thank you|nope|no|that'?s all|that'?s it|all good|i'?m good|all set|im good)[.!]*$/i.test(text.trim()) && text.trim().split(/\s+/).length <= 4) {
+    if (/^(ok\s+)?(nothing|no thanks|no thank you|nope|no|that'?s all|that'?s it|all good|i'?m good|all set|im good|bye|goodbye|good bye|cheers)[.!]*$/i.test(text.trim()) && text.trim().split(/\s+/).length <= 4) {
       bookingState = null;
       replyWithDelay("No problem — thanks for stopping by! We're here whenever you need us.");
       return;
@@ -434,6 +459,22 @@
         addQuickReplies(TOPICS.map((t) => t.title), (chosenTitle) => {
           const chosen = TOPICS.find((t) => t.title === chosenTitle);
           startBookingIntent(chosen ? chosen.service : chosenTitle, null);
+        });
+      });
+      return;
+    }
+    const matchedService = matchServiceFromText(text);
+    if (matchedService) {
+      // Reuse the exact same flow as clicking the button — "read more or book?" —
+      // so a typed mention (even partial, like "whitening" or "implants") gets the
+      // same helpful, guided experience as a menu click, not just a static blurb.
+      replyWithDelay('Would you like to know more first, or go ahead and book?', () => {
+        addQuickReplies(['Tell me more', 'Book now'], (choice) => {
+          if (choice === 'Tell me more') {
+            addBotMsg(`${matchedService.brief} <a href="${matchedService.anchor}" target="_blank" rel="noopener">See full details</a>`);
+          } else {
+            startBookingIntent(matchedService.service, null);
+          }
         });
       });
       return;
