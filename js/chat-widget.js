@@ -281,14 +281,20 @@
     });
   }
 
+  let pendingConfirm = null;
+
   function confirmContactValue(val, contactType) {
-    bookingState = null;
+    pendingConfirm = { val, contactType };
+    bookingState = 'confirming-contact';
     const label = contactType === 'phone' ? 'number' : 'email address';
     replyWithDelay(`Just to confirm — is <strong>${val}</strong> the right ${label}?`, () => {
       addQuickReplies(['Yes, that\'s right', 'No, let me retype it'], (choice) => {
+        bookingState = null;
         if (choice === 'Yes, that\'s right') {
+          pendingConfirm = null;
           reviewBookingIntent(val, contactType);
         } else {
+          pendingConfirm = null;
           bookingState = contactType === 'phone' ? 'awaiting-phone' : 'awaiting-email';
           replyWithDelay(contactType === 'phone' ? 'What number should I send it to?' : 'What email address should I send it to?');
         }
@@ -422,6 +428,37 @@
   }
 
   function handleGeneralInput(text) {
+    if (bookingState === 'confirming-contact' && pendingConfirm) {
+      const t = text.trim().toLowerCase();
+      if (/\bemail\b/i.test(t) && pendingConfirm.contactType !== 'email') {
+        pendingConfirm = null;
+        bookingState = 'awaiting-email';
+        replyWithDelay('Sure — what\'s your email address?');
+        return;
+      }
+      if (/\b(phone|text|number|mobile)\b/i.test(t) && pendingConfirm.contactType !== 'phone') {
+        pendingConfirm = null;
+        bookingState = 'awaiting-phone';
+        replyWithDelay('No problem — what\'s your phone number?');
+        return;
+      }
+      if (/^(yes|yeah|yep|correct|right|that'?s right|yup)\b/i.test(t)) {
+        const { val, contactType } = pendingConfirm;
+        pendingConfirm = null;
+        bookingState = null;
+        reviewBookingIntent(val, contactType);
+        return;
+      }
+      if (/^(no|nope|wrong|incorrect)\b/i.test(t)) {
+        const { contactType } = pendingConfirm;
+        pendingConfirm = null;
+        bookingState = contactType === 'phone' ? 'awaiting-phone' : 'awaiting-email';
+        replyWithDelay(contactType === 'phone' ? 'What number should I send it to?' : 'What email address should I send it to?');
+        return;
+      }
+      replyWithDelay('Just tap Yes or No above, or let me know if you\'d rather switch to phone or email.');
+      return;
+    }
     if (bookingState === 'awaiting-phone') {
       const val = text.trim();
       if (/\bemail\b/i.test(val)) {
