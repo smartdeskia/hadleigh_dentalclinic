@@ -424,16 +424,26 @@
   function handleGeneralInput(text) {
     if (bookingState === 'awaiting-phone') {
       const val = text.trim();
+      if (/\bemail\b/i.test(val)) {
+        bookingState = 'awaiting-email';
+        replyWithDelay('Sure — what\'s your email address?');
+        return;
+      }
       const digits = val.replace(/[^0-9]/g, '');
       const looksValid = /^[0-9+()\s-]{7,}$/.test(val) && digits.length >= 7;
-      if (!looksValid) { replyWithDelay("That doesn't look like a valid phone number — could you try again?"); return; }
+      if (!looksValid) { replyWithDelay("That doesn't look like a valid phone number — could you try again? Or just say \"email\" if you'd rather use that instead."); return; }
       confirmContactValue(val, 'phone');
       return;
     }
     if (bookingState === 'awaiting-email') {
       const val = text.trim().toLowerCase();
+      if (/\b(phone|text|number|mobile)\b/i.test(val)) {
+        bookingState = 'awaiting-phone';
+        replyWithDelay('No problem — what\'s your phone number?');
+        return;
+      }
       const looksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
-      if (!looksValid) { replyWithDelay("That doesn't look like a valid email address — could you try again?"); return; }
+      if (!looksValid) { replyWithDelay("That doesn't look like a valid email address — could you try again? Or just say \"phone\" if you'd rather use that instead."); return; }
       confirmContactValue(val, 'email');
       return;
     }
