@@ -109,7 +109,7 @@
   let visitorName = null;
   let hasOpenedBefore = false;
   // TODO: replace with the real Make.com webhook URL once that scenario is built
-  const BOOKING_WEBHOOK_URL = 'https://hook.make.com/PLACEHOLDER_BOOKING_WEBHOOK_ID';
+  const BOOKING_WEBHOOK_URL = 'https://hook.eu1.make.com/qh379w7lj34nize5v5ns3a7sbeg4mn99';
 
   // Real info per topic — 2-3 lines, no simulated booking, one button to the real Contact page.
   const TOPICS = [
