@@ -419,6 +419,16 @@
       replyWithDelay(`Nice to meet you, ${name}! How can I help you today?`, showMenu);
       return;
     }
+    if (/^(not sure|i don'?t know|idk|no idea|dunno|not yet)\b/i.test(text.trim())) {
+      bookingState = null;
+      replyWithDelay('No worries — take a look through the options below, or ask me anything specific.', showMenu);
+      return;
+    }
+    if (/^(nothing|no thanks|no thank you|nope|no|that'?s all|that'?s it|all good|i'?m good|all set|im good)[.!]*$/i.test(text.trim()) && text.trim().split(/\s+/).length <= 4) {
+      bookingState = null;
+      replyWithDelay("No problem — thanks for stopping by! We're here whenever you need us.");
+      return;
+    }
     if (isGenericBookingIntent(text)) {
       replyWithDelay('Sure — which service would you like to book?', () => {
         addQuickReplies(TOPICS.map((t) => t.title), (chosenTitle) => {
