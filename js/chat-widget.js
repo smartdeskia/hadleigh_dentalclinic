@@ -10,16 +10,18 @@
   styleEl.textContent = `
     #sofia-root { --primary: #17332e; --accent: #e8735f; --bg: #f4f6f5; --text: #1e2b2b; --muted: #7c8c8a; --line: rgba(30,43,43,0.1); font-family: 'Inter', -apple-system, sans-serif; }
     @keyframes sofia-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    #sofia-launcher { position: fixed; bottom: 24px; right: 24px; width: 68px; height: 68px; border-radius: 50%; background: none; padding: 0; border: 2.5px solid #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 9998; box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 0 0 rgba(232,115,95,0.55); transition: transform 0.15s ease; animation: sofia-glow-intro 1.8s ease-out 3, sofia-glow-idle 4.5s ease-in-out 5.4s infinite; }
-    #sofia-launcher:hover { transform: scale(1.06); }
-    #sofia-launcher-avatar { width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-weight: 700; font-size: 26px; color: #fff; background: linear-gradient(155deg, var(--accent), #c85c48); }
-    body.sofia-open #sofia-launcher { animation: none; box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
-    #sofia-launcher .icon-close { display: none; }
-    body.sofia-open #sofia-launcher-avatar { display: none; }
+    #sofia-launcher { position: fixed; bottom: 24px; right: 24px; height: 64px; padding: 0 6px 0 24px; border: none; border-radius: 100px; background: linear-gradient(135deg, var(--accent), #c85c48); cursor: pointer; display: inline-flex; align-items: center; gap: 14px; z-index: 9998; box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 0 0 rgba(232,115,95,0.55); transition: transform 0.15s ease, padding 0.15s ease, width 0.15s ease, border-radius 0.15s ease; animation: sofia-glow-intro 1.8s ease-out 3, sofia-glow-idle 4.5s ease-in-out 5.4s infinite; }
+    #sofia-launcher:hover { transform: scale(1.03); }
+    #sofia-launcher-text { color: #fff; font-weight: 600; font-size: 15px; white-space: nowrap; }
+    #sofia-launcher-icon-wrap { position: relative; width: 52px; height: 52px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    #sofia-badge { position: absolute; top: -4px; right: -4px; width: 22px; height: 22px; border-radius: 50%; background: #e2483a; color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; border: 2px solid #fff; }
+    #sofia-launcher .icon-close { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    body.sofia-open #sofia-launcher { padding: 0; width: 60px; height: 60px; justify-content: center; border-radius: 50%; animation: none; box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
+    body.sofia-open #sofia-launcher-text, body.sofia-open #sofia-launcher-icon-wrap { display: none; }
     body.sofia-open #sofia-launcher .icon-close { display: block; }
-    @keyframes sofia-glow-intro { 0% { box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 0 0 rgba(232,115,95,0.55); } 60% { box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 0 14px rgba(232,115,95,0); } 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 0 0 rgba(232,115,95,0); } }
-    @keyframes sofia-glow-idle { 0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 8px 1px rgba(232,115,95,0.22); } 50% { box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 15px 3px rgba(232,115,95,0.42); } }
-    @media (prefers-reduced-motion: reduce) { #sofia-launcher { animation: none; box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 10px 2px rgba(232,115,95,0.3); } }
+    @keyframes sofia-glow-intro { 0% { box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 0 0 rgba(232,115,95,0.55); } 60% { box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 0 16px rgba(232,115,95,0); } 100% { box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 0 0 rgba(232,115,95,0); } }
+    @keyframes sofia-glow-idle { 0%, 100% { box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 8px 1px rgba(232,115,95,0.22); } 50% { box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 15px 3px rgba(232,115,95,0.42); } }
+    @media (prefers-reduced-motion: reduce) { #sofia-launcher { animation: none; box-shadow: 0 6px 20px rgba(0,0,0,0.25), 0 0 10px 2px rgba(232,115,95,0.3); } }
     #sofia-panel { position: fixed; bottom: 84px; right: 24px; width: 380px; max-width: calc(100vw - 32px); max-height: calc(100vh - 120px); background: var(--bg); border-radius: 18px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.25); z-index: 9997; display: flex; flex-direction: column; opacity: 0; transform: translateY(16px) scale(0.98); pointer-events: none; transition: opacity 0.22s ease, transform 0.22s ease; }
     body.sofia-open #sofia-panel { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
     #sofia-header { background: var(--primary); color: #fff; padding: 16px 18px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
@@ -70,8 +72,12 @@
   const root = document.createElement('div');
   root.id = 'sofia-root';
   root.innerHTML = `
-    <button id="sofia-launcher" aria-label="Open chat with Sofia">
-      <div id="sofia-launcher-avatar">S</div>
+    <button id="sofia-launcher" aria-label="Chat with Sofia">
+      <span id="sofia-launcher-text">Chat with Sofia</span>
+      <span id="sofia-launcher-icon-wrap">
+        <svg class="icon-chat" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e8735f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        <span id="sofia-badge">1</span>
+      </span>
       <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div id="sofia-panel" role="dialog" aria-label="Chat with Sofia">
@@ -107,6 +113,7 @@
   const refreshBtn = document.getElementById('sofia-refresh-btn');
   const input = document.getElementById('sofia-input');
   const sendBtn = document.getElementById('sofia-send');
+  const badge = document.getElementById('sofia-badge');
 
   let visitorName = null;
   let hasOpenedBefore = false;
@@ -541,6 +548,7 @@
 
   function openPanel() {
     document.body.classList.add('sofia-open');
+    if (badge) badge.style.display = 'none';
     if (!hasOpenedBefore) { hasOpenedBefore = true; replyWithDelay("Hi! I'm Sofia 👋 What's your name?"); }
   }
 
@@ -557,6 +565,7 @@
           visitorName = savedName;
           hasOpenedBefore = true;
           document.body.classList.add('sofia-open');
+          if (badge) badge.style.display = 'none';
           replyWithDelay(`Welcome back, ${savedName}! Pick another option below, or ask me anything.`, showMenu);
         }
       }
