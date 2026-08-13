@@ -9,15 +9,17 @@
   const styleEl = document.createElement('style');
   styleEl.textContent = `
     #sofia-root { --primary: #17332e; --accent: #e8735f; --bg: #f4f6f5; --text: #1e2b2b; --muted: #7c8c8a; --line: rgba(30,43,43,0.1); font-family: 'Inter', -apple-system, sans-serif; }
-    @keyframes sofia-pulse { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.9); opacity: 0; } }
     @keyframes sofia-fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-    #sofia-launcher { position: fixed; bottom: 24px; right: 24px; width: 60px; height: 60px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 9998; box-shadow: 0 4px 14px rgba(0,0,0,0.18); transition: transform 0.15s ease; }
+    #sofia-launcher { position: fixed; bottom: 24px; right: 24px; width: 68px; height: 68px; border-radius: 50%; background: none; padding: 0; border: 2.5px solid #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 9998; box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 0 0 rgba(232,115,95,0.55); transition: transform 0.15s ease; animation: sofia-glow-intro 1.8s ease-out 3, sofia-glow-idle 4.5s ease-in-out 5.4s infinite; }
     #sofia-launcher:hover { transform: scale(1.06); }
-    #sofia-launcher::before { content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--accent); opacity: 0.5; animation: sofia-pulse 2.2s ease-out infinite; z-index: -1; pointer-events: none; }
-    body.sofia-open #sofia-launcher::before { animation: none; opacity: 0; }
+    #sofia-launcher-avatar { width: 100%; height: 100%; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: Georgia, serif; font-weight: 700; font-size: 26px; color: #fff; background: linear-gradient(155deg, var(--accent), #c85c48); }
+    body.sofia-open #sofia-launcher { animation: none; box-shadow: 0 4px 16px rgba(0,0,0,0.22); }
     #sofia-launcher .icon-close { display: none; }
-    body.sofia-open #sofia-launcher .icon-chat { display: none; }
+    body.sofia-open #sofia-launcher-avatar { display: none; }
     body.sofia-open #sofia-launcher .icon-close { display: block; }
+    @keyframes sofia-glow-intro { 0% { box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 0 0 rgba(232,115,95,0.55); } 60% { box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 0 14px rgba(232,115,95,0); } 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 0 0 rgba(232,115,95,0); } }
+    @keyframes sofia-glow-idle { 0%, 100% { box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 8px 1px rgba(232,115,95,0.22); } 50% { box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 15px 3px rgba(232,115,95,0.42); } }
+    @media (prefers-reduced-motion: reduce) { #sofia-launcher { animation: none; box-shadow: 0 4px 16px rgba(0,0,0,0.22), 0 0 10px 2px rgba(232,115,95,0.3); } }
     #sofia-panel { position: fixed; bottom: 84px; right: 24px; width: 380px; max-width: calc(100vw - 32px); max-height: calc(100vh - 120px); background: var(--bg); border-radius: 18px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.25); z-index: 9997; display: flex; flex-direction: column; opacity: 0; transform: translateY(16px) scale(0.98); pointer-events: none; transition: opacity 0.22s ease, transform 0.22s ease; }
     body.sofia-open #sofia-panel { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
     #sofia-header { background: var(--primary); color: #fff; padding: 16px 18px; display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
@@ -69,8 +71,8 @@
   root.id = 'sofia-root';
   root.innerHTML = `
     <button id="sofia-launcher" aria-label="Open chat with Sofia">
-      <svg class="icon-chat" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
-      <svg class="icon-close" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <div id="sofia-launcher-avatar">S</div>
+      <svg class="icon-close" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div id="sofia-panel" role="dialog" aria-label="Chat with Sofia">
       <div id="sofia-header">
